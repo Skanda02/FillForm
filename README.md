@@ -10,16 +10,11 @@
 - [Vision](#-vision)
 - [Key Features](#-key-features)
 - [System Overview](#-system-overview)
-- [Architecture](#-architecture)
 - [Tech Stack](#-tech-stack)
 - [Workflow](#-workflow)
 - [Getting Started](#-getting-started)
 - [Project Structure](#-project-structure)
-- [Contribution Guide](#-contribution-guide)
-- [Roadmap](#-roadmap)
-- [Challenges](#-challenges)
-- [Future Scope](#-future-scope)
-- [License](#-license)
+
 
 ---
 
@@ -67,9 +62,6 @@ FillForm consists of 6 major modules:
 6. Submission Tracker  
 ---
 
-
----
-
 ## Tech Stack
 
 | Layer        | Technology |
@@ -92,7 +84,8 @@ FillForm consists of 6 major modules:
 7. Auto-fill form
 8. Track submission
 
-fillform```/
+## Project Structure
+```
 │
 ├── backend/
 │   ├── app.py
@@ -113,4 +106,5 @@ fillform```/
 │
 ├── requirements.txt
 ├── README.md
-└── .gitignore```
+└── .gitignore
+```
