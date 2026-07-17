@@ -4,8 +4,73 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <title>FillForm</title>
+    <style>
+      body { font-family: system-ui, sans-serif; margin: 0; background: linear-gradient(135deg, #f8fafc, #eef2ff); color: #111827; }
+      .container { max-width: 960px; margin: 0 auto; padding: 40px 20px 56px; }
+      .hero { margin-bottom: 24px; }
+      .panel { background: white; border-radius: 20px; padding: 24px; box-shadow: 0 12px 32px rgba(15, 23, 42, 0.08); }
+      label { display: block; font-weight: 700; margin: 16px 0 8px; }
+      textarea, input[type="file"] { width: 100%; box-sizing: border-box; }
+      textarea { min-height: 220px; resize: vertical; padding: 14px; border-radius: 14px; border: 1px solid #d1d5db; font: inherit; }
+      input[type="file"] { padding: 10px 0; }
+      button { margin-top: 18px; padding: 12px 18px; border: 0; border-radius: 14px; background: #111827; color: white; font: inherit; font-weight: 700; cursor: pointer; }
+      button:hover { background: #0f172a; }
+      pre { margin-top: 20px; white-space: pre-wrap; word-break: break-word; background: #0f172a; color: #e2e8f0; padding: 18px; border-radius: 14px; overflow: auto; }
+      .subtle { color: #64748b; }
+      .grid { display: grid; gap: 20px; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); }
+      .tag { display: inline-block; margin-right: 8px; margin-bottom: 8px; padding: 6px 10px; border-radius: 999px; background: #e0e7ff; color: #3730a3; font-size: 12px; font-weight: 700; }
+    </style>
   </head>
   <body>
-    <div id="root"></div>
+    <main class="container">
+      <section class="hero">
+        <span class="tag">PDF</span>
+        <span class="tag">Text</span>
+        <span class="tag">Analysis</span>
+        <h1>FillForm</h1>
+        <p class="subtle">Paste a document or upload a PDF to extract text, find deadlines, and generate autofill hints.</p>
+      </section>
+
+      <section class="panel grid">
+        <div>
+          <label for="text">Text input</label>
+          <textarea id="text" placeholder="Paste a form, application, or notes here..."></textarea>
+        </div>
+        <div>
+          <label for="file">PDF input</label>
+          <input id="file" type="file" accept="application/pdf" />
+          <button id="submit">Analyze input</button>
+          <pre id="output">Submit text or a PDF to see the response here.</pre>
+        </div>
+      </section>
+    </main>
+
+    <script>
+      const submitButton = document.getElementById('submit');
+      const output = document.getElementById('output');
+
+      submitButton.addEventListener('click', async () => {
+        const formData = new FormData();
+        const text = document.getElementById('text').value;
+        const file = document.getElementById('file').files[0];
+
+        if (text) formData.append('text', text);
+        if (file) formData.append('file', file);
+
+        output.textContent = 'Processing...';
+
+        try {
+          const response = await fetch('http://127.0.0.1:5000/analyze', {
+            method: 'POST',
+            body: formData,
+          });
+
+          const data = await response.json();
+          output.textContent = JSON.stringify(data, null, 2);
+        } catch (error) {
+          output.textContent = String(error);
+        }
+      });
+    </script>
   </body>
 </html>
