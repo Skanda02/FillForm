@@ -1,14 +1,10 @@
 """Flask application entry point for FillForm."""
 
-from flask import Flask, jsonify, render_template_string, request
+from flask import Flask, render_template_string
 from flask_cors import CORS
 
 from database.models import initialize_database, save_submission
 from routes.api import api_bp
-from services.analyzer import analyze_text
-from services.autofill import build_autofill_profile
-from services.parser import parse_submission_input
-from services.reminders import build_reminder_plan
 
 
 HOME_TEMPLATE = """
@@ -55,7 +51,7 @@ HOME_TEMPLATE = """
 				if (file) formData.append('file', file);
 				output.textContent = 'Processing...';
 				try {
-					const response = await fetch('/analyze', { method: 'POST', body: formData });
+					const response = await fetch('/api/analyze', { method: 'POST', body: formData });
 					const result = await response.json();
 					output.textContent = JSON.stringify(result, null, 2);
 				} catch (error) {
@@ -74,6 +70,9 @@ def create_app() -> Flask:
 	app.register_blueprint(api_bp)
 	initialize_database()
 
+	@app.get("/")
+	def home() -> str:
+		return render_template_string(HOME_TEMPLATE)
 	@app.get("/")
 	def home() -> str:
 		return render_template_string(HOME_TEMPLATE)

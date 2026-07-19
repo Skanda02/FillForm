@@ -19,6 +19,44 @@
       .subtle { color: #64748b; }
       .grid { display: grid; gap: 20px; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); }
       .tag { display: inline-block; margin-right: 8px; margin-bottom: 8px; padding: 6px 10px; border-radius: 999px; background: #e0e7ff; color: #3730a3; font-size: 12px; font-weight: 700; }
+      .result-grid { display: grid; gap: 12px; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); margin-top: 16px; }
+      .result-card { background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 14px; padding: 14px; }
+      .result-label { display: block; font-size: 12px; text-transform: uppercase; letter-spacing: 0.08em; color: #64748b; margin-bottom: 8px; }
+      .result-value { font-size: 16px; font-weight: 700; color: #0f172a; word-break: break-word; }
+      .error { margin-top: 16px; padding: 12px 14px; border-radius: 12px; background: #fef2f2; color: #991b1b; display: none; }
+      .result-card.deadline-active { border-color: #86efac; background: #f0fdf4; }
+      .result-card.deadline-expired { border-color: #fecaca; background: #fef2f2; }
+      .result-card.deadline-today { border-color: #fde68a; background: #fffbeb; }
+      .meta-row { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 8px; align-items: center; }
+      .status-pill { display: inline-flex; align-items: center; gap: 8px; padding: 6px 10px; border-radius: 999px; font-size: 12px; font-weight: 700; }
+      .status-pill.active { background: #dcfce7; color: #166534; }
+      .status-pill.expired { background: #fee2e2; color: #991b1b; }
+      .status-pill.today { background: #fef3c7; color: #92400e; }
+      .quick-apply { display: inline-flex; align-items: center; justify-content: center; margin-top: 10px; padding: 10px 14px; border-radius: 12px; background: #1d4ed8; color: white; text-decoration: none; font-weight: 700; }
+      .quick-apply:hover { background: #1e40af; }
+      .quick-apply.active { background: #16a34a; }
+      .quick-apply.active:hover { background: #15803d; }
+      .quick-apply.closed { background: #dc2626; }
+      .quick-apply.closed:hover { background: #b91c1c; }
+      .quick-apply.today { background: #d97706; }
+      .quick-apply.today:hover { background: #b45309; }
+      .registration-value.active { color: #15803d; }
+      .registration-value.closed { color: #b91c1c; }
+      .registration-value.today { color: #b45309; }
+      .summary-box { margin-top: 16px; padding: 16px; border-radius: 16px; background: #f8fafc; border: 1px solid #e2e8f0; }
+      .summary-box h3 { margin: 0 0 8px; }
+      .summary-box p { margin: 0; color: #334155; line-height: 1.6; }
+      .timer-wrap { margin-top: 12px; display: none; }
+      .timer-label { font-size: 12px; font-weight: 700; color: #92400e; margin-bottom: 8px; }
+        .summary-list { margin: 12px 0 0; padding-left: 18px; color: #334155; }
+        .summary-list li { margin-bottom: 6px; }
+      .summary-grid { display: grid; gap: 12px; margin-top: 12px; }
+      .summary-section { padding: 12px; border-radius: 12px; background: white; border: 1px solid #e2e8f0; }
+      .summary-section h4 { margin: 0 0 8px; font-size: 14px; color: #0f172a; }
+      .summary-section p { margin: 0; color: #334155; line-height: 1.6; }
+      .timer-bar { width: 100%; height: 12px; border-radius: 999px; background: #fde68a; overflow: hidden; }
+      .timer-fill { height: 100%; width: 0%; background: linear-gradient(90deg, #f59e0b, #ef4444); transition: width 0.4s ease; }
+      .timer-text { margin-top: 8px; font-size: 13px; font-weight: 700; color: #92400e; }
     </style>
   </head>
   <body>
@@ -40,6 +78,53 @@
           <label for="file">PDF input</label>
           <input id="file" type="file" accept="application/pdf" />
           <button id="submit">Analyze input</button>
+          <div class="result-grid">
+            <div class="result-card">
+              <span class="result-label">Company</span>
+              <div class="result-value" id="company">-</div>
+            </div>
+            <div class="result-card">
+              <span class="result-label">Role</span>
+              <div class="result-value" id="role">-</div>
+            </div>
+            <div class="result-card">
+              <span class="result-label">Deadline</span>
+              <div class="result-value" id="deadline">-</div>
+              <div class="meta-row">
+                <span class="status-pill" id="deadline-status">Not checked</span>
+              </div>
+              <div class="timer-wrap" id="timer-wrap">
+                <div class="timer-label">Time left today</div>
+                <div class="timer-bar"><div class="timer-fill" id="timer-fill"></div></div>
+                <div class="timer-text" id="timer-text"></div>
+              </div>
+            </div>
+            <div class="result-card">
+              <span class="result-label">CTC</span>
+              <div class="result-value" id="ctc">-</div>
+            </div>
+            <div class="result-card">
+              <span class="result-label">Eligibility</span>
+              <div class="result-value" id="eligibility">-</div>
+            </div>
+            <div class="result-card">
+              <span class="result-label">Criteria</span>
+              <div class="result-value" id="criteria">-</div>
+            </div>
+            <div class="result-card">
+              <span class="result-label">Registration Link</span>
+              <div class="result-value" id="registration-link">-</div>
+              <div class="meta-row">
+                <span class="status-pill" id="registration-status">Not checked</span>
+              </div>
+              <a class="quick-apply" id="quick-apply" href="#" target="_blank" rel="noreferrer" style="display:none;">Quick Apply</a>
+            </div>
+            <div class="result-card">
+              <span class="result-label">Job Summary</span>
+              <div id="summary"></div>
+            </div>
+          </div>
+          <div class="error" id="error"></div>
           <pre id="output">Submit text or a PDF to see the response here.</pre>
         </div>
       </section>
@@ -48,6 +133,241 @@
     <script>
       const submitButton = document.getElementById('submit');
       const output = document.getElementById('output');
+      const company = document.getElementById('company');
+      const role = document.getElementById('role');
+      const deadline = document.getElementById('deadline');
+      const deadlineStatus = document.getElementById('deadline-status');
+      const timerWrap = document.getElementById('timer-wrap');
+      const timerFill = document.getElementById('timer-fill');
+      const timerText = document.getElementById('timer-text');
+      const ctc = document.getElementById('ctc');
+      const eligibility = document.getElementById('eligibility');
+      const criteria = document.getElementById('criteria');
+      const registrationLink = document.getElementById('registration-link');
+      const registrationStatus = document.getElementById('registration-status');
+      const quickApply = document.getElementById('quick-apply');
+      const summary = document.getElementById('summary');
+      const errorBox = document.getElementById('error');
+      let deadlineTimerId = null;
+
+      const API_BASE_URL = window.FILLFORM_API_BASE_URL || 'http://127.0.0.1:5000';
+
+      function format12Hour(date) {
+        const pad = (value) => String(value).padStart(2, '0');
+        const hours24 = date.getHours();
+        const hours12 = hours24 % 12 || 12;
+        const meridiem = hours24 >= 12 ? 'p.m.' : 'a.m.';
+        return `${date.toLocaleDateString(undefined, { month: 'short', day: 'numeric', year: 'numeric' })}, ${hours12}:${pad(date.getMinutes())} ${meridiem}`;
+      }
+
+      function formatCompactDuration(milliseconds) {
+        if (milliseconds <= 0) return 'Deadline passed';
+        const totalMinutes = Math.floor(milliseconds / 60000);
+        const days = Math.floor(totalMinutes / 1440);
+        const hours = Math.floor((totalMinutes % 1440) / 60);
+        const minutes = totalMinutes % 60;
+        const parts = [];
+        if (days) parts.push(`${days}d`);
+        if (hours) parts.push(`${hours}h`);
+        parts.push(`${minutes}m`);
+        return parts.join(' ');
+      }
+
+      function getDeadlineStatus(date) {
+        const now = new Date();
+        const startOfToday = new Date(now);
+        startOfToday.setHours(0, 0, 0, 0);
+        const startOfDeadlineDay = new Date(date);
+        startOfDeadlineDay.setHours(0, 0, 0, 0);
+
+        if (date < now) return 'expired';
+        if (startOfToday.getTime() === startOfDeadlineDay.getTime()) return 'today';
+        return 'active';
+      }
+
+      function clearDeadlineTimer() {
+        if (deadlineTimerId) {
+          clearInterval(deadlineTimerId);
+          deadlineTimerId = null;
+        }
+      }
+
+      function renderSummary(details) {
+        summary.innerHTML = '';
+
+        if (!details) {
+          summary.textContent = '-';
+          return;
+        }
+
+        const wrapper = document.createElement('div');
+        wrapper.className = 'summary-grid';
+
+        const createSection = (title, content) => {
+          if (!content || (Array.isArray(content) && content.length === 0)) {
+            return;
+          }
+
+          const section = document.createElement('div');
+          section.className = 'summary-section';
+
+          const heading = document.createElement('h4');
+          heading.textContent = title;
+          section.appendChild(heading);
+
+          if (Array.isArray(content)) {
+            const list = document.createElement('ul');
+            list.className = 'summary-list';
+            content.forEach((item) => {
+              const listItem = document.createElement('li');
+              listItem.textContent = item;
+              list.appendChild(listItem);
+            });
+            section.appendChild(list);
+          } else {
+            const paragraph = document.createElement('p');
+            paragraph.textContent = content;
+            section.appendChild(paragraph);
+          }
+
+          wrapper.appendChild(section);
+        };
+
+        createSection('Overview', details.overview);
+        createSection('Highlights', details.highlights);
+        createSection('Responsibilities', details.responsibilities);
+        createSection('Requirements', details.requirements);
+        createSection('Benefits', details.benefits);
+
+        summary.appendChild(wrapper);
+      }
+
+      function setRegistrationState(status, deadlineStatusValue) {
+        registrationStatus.className = 'status-pill';
+        quickApply.className = 'quick-apply';
+        registrationLink.className = 'result-value registration-value';
+
+        if (status === 'closed') {
+          registrationStatus.textContent = 'Closed';
+          registrationStatus.classList.add('expired');
+          quickApply.classList.add('closed');
+          registrationLink.classList.add('closed');
+        } else if (status === 'today') {
+          registrationStatus.textContent = 'Closes today';
+          registrationStatus.classList.add('today');
+          quickApply.classList.add('today');
+          registrationLink.classList.add('today');
+        } else if (status === 'active') {
+          registrationStatus.textContent = 'Active';
+          registrationStatus.classList.add('active');
+          quickApply.classList.add('active');
+          registrationLink.classList.add('active');
+        } else {
+          registrationStatus.textContent = 'Not checked';
+        }
+
+        if (deadlineStatusValue === 'expired') {
+          quickApply.classList.add('closed');
+        }
+      }
+
+      function renderStructuredDetails(details) {
+        company.textContent = details?.company || '-';
+        role.textContent = details?.role || 'Not detected';
+        ctc.textContent = details?.ctc || '-';
+        registrationLink.textContent = details?.registration_link || '-';
+        quickApply.style.display = details?.registration_link ? 'inline-flex' : 'none';
+        quickApply.href = details?.registration_link || '#';
+        renderSummary(details?.job_summary);
+
+        const eligibilityText = [];
+        if (details?.eligibility?.batch) eligibilityText.push(`Batch: ${details.eligibility.batch}`);
+        if (details?.eligibility?.branches?.length) eligibilityText.push(`Branches: ${details.eligibility.branches.join(', ')}`);
+        if (details?.eligibility?.degree) eligibilityText.push(`Degree: ${details.eligibility.degree}`);
+        eligibility.textContent = eligibilityText.length ? eligibilityText.join(' | ') : '-';
+
+        const criteriaText = [];
+        if (details?.criteria?.percentage) criteriaText.push(`Percentage: ${details.criteria.percentage}`);
+        if (details?.criteria?.backlog_rule) criteriaText.push(`Backlog: ${details.criteria.backlog_rule}`);
+        criteria.textContent = criteriaText.length ? criteriaText.join(' | ') : '-';
+
+        clearDeadlineTimer();
+        timerWrap.style.display = 'none';
+        timerFill.style.width = '0%';
+        timerText.textContent = '';
+        deadline.className = 'result-value';
+        deadlineStatus.className = 'status-pill';
+        registrationLink.className = 'result-value registration-value';
+        setRegistrationState(details?.registration_status);
+
+        if (details?.deadline) {
+          const deadlineDate = new Date(details.deadline);
+          if (!Number.isNaN(deadlineDate.getTime())) {
+            deadline.textContent = format12Hour(deadlineDate);
+            const status = getDeadlineStatus(deadlineDate);
+
+            if (status === 'expired') {
+              deadlineStatus.textContent = 'Closed';
+              deadlineStatus.classList.add('expired');
+              deadline.classList.add('deadline-expired');
+              setRegistrationState('closed', 'expired');
+            } else if (status === 'today') {
+              deadlineStatus.textContent = 'Deadline today';
+              deadlineStatus.classList.add('today');
+              deadline.classList.add('deadline-today');
+              setRegistrationState('today', 'today');
+              timerWrap.style.display = 'block';
+
+              const endOfDay = new Date(deadlineDate);
+              endOfDay.setHours(23, 59, 59, 999);
+              const deadlineTime = deadlineDate.getTime();
+              const startOfDay = new Date(deadlineDate);
+              startOfDay.setHours(0, 0, 0, 0);
+              const totalWindow = Math.max(deadlineTime - startOfDay.getTime(), 1);
+
+              const updateTimer = () => {
+                const now = new Date();
+                const remaining = deadlineTime - now.getTime();
+                const elapsed = now.getTime() - startOfDay.getTime();
+                const progress = Math.min(Math.max((elapsed / totalWindow) * 100, 0), 100);
+                timerFill.style.width = `${progress}%`;
+                timerText.textContent = remaining > 0
+                  ? `${formatCompactDuration(remaining)} left until deadline`
+                  : 'Deadline passed';
+                if (remaining <= 0) {
+                  deadlineStatus.textContent = 'Closed';
+                  deadlineStatus.className = 'status-pill expired';
+                  deadline.className = 'result-value deadline-expired';
+                  setRegistrationState('closed', 'expired');
+                  clearDeadlineTimer();
+                }
+              };
+
+              updateTimer();
+              deadlineTimerId = setInterval(updateTimer, 1000);
+            } else {
+              deadlineStatus.textContent = 'Active';
+              deadlineStatus.classList.add('active');
+              deadline.classList.add('deadline-active');
+              setRegistrationState('active');
+            }
+          } else {
+            deadline.textContent = details.deadline;
+            renderSummary(details?.job_summary);
+          }
+        }
+      }
+
+      function renderError(message) {
+        if (!message) {
+          errorBox.style.display = 'none';
+          errorBox.textContent = '';
+          return;
+        }
+
+        errorBox.style.display = 'block';
+        errorBox.textContent = message;
+      }
 
       submitButton.addEventListener('click', async () => {
         const formData = new FormData();
@@ -58,17 +378,32 @@
         if (file) formData.append('file', file);
 
         output.textContent = 'Processing...';
+        output.style.display = 'block';
+        renderError(null);
 
         try {
-          const response = await fetch('http://127.0.0.1:5000/analyze', {
+          const response = await fetch(`${API_BASE_URL}/api/analyze`, {
             method: 'POST',
             body: formData,
           });
 
+          if (!response.ok) {
+            const body = await response.text();
+            throw new Error(body || `Request failed with status ${response.status}`);
+          }
+
           const data = await response.json();
-          output.textContent = JSON.stringify(data, null, 2);
+          renderStructuredDetails(data.extracted);
+          output.textContent = '';
+          output.style.display = 'none';
         } catch (error) {
-          output.textContent = String(error);
+          const message = error instanceof Error
+            ? `${error.message}. Make sure the backend is running with Python and Flask on port 5000.`
+            : 'Failed to fetch data. Make sure the backend is running on port 5000.';
+          output.style.display = 'block';
+          output.textContent = message;
+          renderError(message);
+          renderStructuredDetails(null);
         }
       });
     </script>
