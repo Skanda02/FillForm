@@ -73,10 +73,7 @@ def create_app() -> Flask:
 	@app.get("/")
 	def home() -> str:
 		return render_template_string(HOME_TEMPLATE)
-	@app.get("/")
-	def home() -> str:
-		return render_template_string(HOME_TEMPLATE)
-
+	
 	@app.post("/analyze")
 	def analyze() -> tuple[object, int]:
 		parsed = parse_submission_input(request)
