@@ -3,6 +3,7 @@
 from flask import Flask, jsonify, render_template_string, request
 from flask_cors import CORS
 
+from database.models import initialize_database, save_submission
 from routes.api import api_bp
 from services.analyzer import analyze_text
 from services.autofill import build_autofill_profile
@@ -68,31 +69,44 @@ HOME_TEMPLATE = """
 
 
 def create_app() -> Flask:
-		app = Flask(__name__)
-		CORS(app)
-		app.register_blueprint(api_bp)
+	app = Flask(__name__)
+	CORS(app)
+	app.register_blueprint(api_bp)
+	initialize_database()
 
-		@app.get("/")
-		def home() -> str:
-				return render_template_string(HOME_TEMPLATE)
+	@app.get("/")
+	def home() -> str:
+		return render_template_string(HOME_TEMPLATE)
 
-		@app.post("/analyze")
-		def analyze() -> tuple[object, int]:
-				parsed = parse_submission_input(request)
-				analysis = analyze_text(parsed["text"])
-				autofill_profile = build_autofill_profile(parsed["text"])
-				reminder_plan = build_reminder_plan(analysis.get("deadline_candidates", []))
-				return jsonify(
-						{
-								"input": parsed,
-								"analysis": analysis,
-								"autofill": autofill_profile,
-								"reminders": reminder_plan,
-						}
-				), 200
+	@app.post("/analyze")
+	def analyze() -> tuple[object, int]:
+		parsed = parse_submission_input(request)
+		analysis = analyze_text(parsed["text"])
+		autofill_profile = build_autofill_profile(parsed["text"])
+		reminder_plan = build_reminder_plan(analysis.get("deadline_candidates", []))
+		submission_id = save_submission(
+			source_type=parsed["source_type"],
+			filename=parsed["filename"],
+			text=parsed["text"],
+			summary=analysis.get("summary"),
+			sentence_count=analysis.get("sentence_count"),
+			keyword_count=analysis.get("keyword_count"),
+			keywords=analysis.get("keywords"),
+			deadline_candidates=analysis.get("deadline_candidates"),
+			has_deadline_signal=analysis.get("has_deadline_signal", False),
+			reminder_plan=reminder_plan,
+		)
+		return jsonify(
+			{
+				"submission_id": submission_id,
+				"input": parsed,
+				"analysis": analysis,
+				"autofill": autofill_profile,
+				"reminders": reminder_plan,
+			}
+		), 200
 
-		return app
-
+	return app
 
 app = create_app()
 
