@@ -124,6 +124,7 @@
               <div id="summary"></div>
             </div>
           </div>
+          <div class="error" id="page-warning" style="display:none;"></div>
           <div class="error" id="error"></div>
           <pre id="output">Submit text or a PDF to see the response here.</pre>
         </div>
@@ -147,10 +148,38 @@
       const registrationStatus = document.getElementById('registration-status');
       const quickApply = document.getElementById('quick-apply');
       const summary = document.getElementById('summary');
+      const pageWarning = document.getElementById('page-warning');
       const errorBox = document.getElementById('error');
       let deadlineTimerId = null;
 
-      const API_BASE_URL = window.FILLFORM_API_BASE_URL || 'http://127.0.0.1:5000';
+      const API_BASE_URL = window.FILLFORM_API_BASE_URL || (function() {
+        // If the page is already served from the backend (port 5000), use that origin.
+        try {
+          const loc = window.location;
+          if (loc.protocol.startsWith('http') && (loc.port === '5000' || loc.host.includes(':5000'))) {
+            return loc.origin;
+          }
+        } catch (e) {
+          /* ignore */
+        }
+        // Otherwise, point explicitly at the backend dev server.
+        return 'http://127.0.0.1:5000';
+      })();
+
+      function showPageWarning() {
+        if (window.location.protocol === 'file:') {
+          pageWarning.style.display = 'block';
+          pageWarning.textContent = 'Warning: You opened this page directly from your computer. Please run the backend and open the app at http://127.0.0.1:5000 instead.';
+          submitButton.disabled = true;
+          return;
+        }
+
+        pageWarning.style.display = 'none';
+        pageWarning.textContent = '';
+        submitButton.disabled = false;
+      }
+
+      showPageWarning();
 
       function format12Hour(date) {
         const pad = (value) => String(value).padStart(2, '0');
@@ -368,6 +397,18 @@
         errorBox.style.display = 'block';
         errorBox.textContent = message;
       }
+
+      function showPageWarning() {
+        if (window.location.protocol === 'file:') {
+          pageWarning.style.display = 'block';
+          pageWarning.textContent = 'Warning: This page is loaded from your file system. Open the app from http://127.0.0.1:5000 for API calls to work correctly.';
+        } else {
+          pageWarning.style.display = 'none';
+          pageWarning.textContent = '';
+        }
+      }
+
+      showPageWarning();
 
       submitButton.addEventListener('click', async () => {
         const formData = new FormData();

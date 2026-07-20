@@ -10,7 +10,7 @@ from typing import Any
 
 import requests
 
-from config import get_gemini_api_key, get_gemini_model
+from backend.config import get_gemini_api_key, get_gemini_model
 
 
 GEMINI_ENDPOINT = "https://generativelanguage.googleapis.com/v1beta/models/{model}:generateContent?key={api_key}"
