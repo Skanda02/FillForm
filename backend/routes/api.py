@@ -10,12 +10,12 @@ from flask import Blueprint, jsonify, request
 ROOT_DIR = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT_DIR.parent))
 
-from backend.services.gemini_service import GeminiExtractionError, analyze_with_gemini
+from backend.services.groq_service import GroqExtractionError, analyze_with_groq
 from backend.services.parser import parse_submission_input
 from backend.services.analyzer import analyze_text
 from backend.services.autofill import build_autofill_profile
 from backend.services.reminders import build_reminder_plan
-from backend.config import get_gemini_api_key, get_gemini_model
+from backend.config import get_groq_api_key, get_groq_model
 from database.models import save_submission
 
 
@@ -62,8 +62,8 @@ def api_analyze() -> tuple[object, int]:
 
     try:
         parsed = parse_submission_input(request)
-        if get_gemini_api_key():
-            extracted = analyze_with_gemini(parsed)
+        if get_groq_api_key():
+            extracted = analyze_with_groq(parsed)
         else:
             analysis = analyze_text(parsed["text"])
             extracted = _build_local_extracted(analysis)
@@ -80,7 +80,7 @@ def api_analyze() -> tuple[object, int]:
                 reminder_plan=build_reminder_plan(analysis.get("deadline_candidates", [])),
             )
         return jsonify({"extracted": extracted}), 200
-    except GeminiExtractionError as error:
+    except GroqExtractionError as error:
         return jsonify({"error": str(error)}), 502
     except ValueError as error:
         return jsonify({"error": str(error)}), 400
@@ -88,10 +88,10 @@ def api_analyze() -> tuple[object, int]:
 
 @api_bp.get("/api/diag")
 def api_diag() -> tuple[object, int]:
-    """Lightweight diagnostic: report whether a Gemini API key is loaded and which model is configured.
+    """Lightweight diagnostic: report whether a Groq API key is loaded and which model is configured.
 
     This does NOT return the key value.
     """
-    key_present = bool(get_gemini_api_key())
-    model = get_gemini_model()
-    return jsonify({"gemini_key_present": key_present, "gemini_model": model}), 200
+    key_present = bool(get_groq_api_key())
+    model = get_groq_model()
+    return jsonify({"groq_key_present": key_present, "groq_model": model}), 200
