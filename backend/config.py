@@ -53,3 +53,15 @@ def get_google_client_id() -> str | None:
 
 def get_google_client_secret() -> str | None:
 	return os.environ.get("GOOGLE_CLIENT_SECRET")
+
+
+def get_secret_key() -> str:
+	return os.environ.get("SECRET_KEY", "fillform-dev-secret-change-in-production")
+
+
+def get_google_login_client_id() -> str | None:
+	return os.environ.get("GOOGLE_LOGIN_CLIENT_ID")
+
+
+def get_google_login_client_secret() -> str | None:
+	return os.environ.get("GOOGLE_LOGIN_CLIENT_SECRET")
