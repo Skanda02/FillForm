@@ -41,3 +41,15 @@ def get_groq_api_key() -> str | None:
 
 def get_groq_model() -> str:
 	return os.environ.get("GROQ_MODEL", "llama-3.3-70b-versatile")
+
+
+def get_mongo_uri() -> str:
+	return os.environ.get("MONGO_URI", "mongodb://localhost:27017")
+
+
+def get_google_client_id() -> str | None:
+	return os.environ.get("GOOGLE_CLIENT_ID")
+
+
+def get_google_client_secret() -> str | None:
+	return os.environ.get("GOOGLE_CLIENT_SECRET")
