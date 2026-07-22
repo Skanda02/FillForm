@@ -1,452 +1,676 @@
 <!doctype html>
 <html lang="en">
-  <head>
-    <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>FillForm</title>
-    <style>
-      body { font-family: system-ui, sans-serif; margin: 0; background: linear-gradient(135deg, #f8fafc, #eef2ff); color: #111827; }
-      .container { max-width: 960px; margin: 0 auto; padding: 40px 20px 56px; }
-      .hero { margin-bottom: 24px; }
-      .panel { background: white; border-radius: 20px; padding: 24px; box-shadow: 0 12px 32px rgba(15, 23, 42, 0.08); }
-      label { display: block; font-weight: 700; margin: 16px 0 8px; }
-      textarea, input[type="file"] { width: 100%; box-sizing: border-box; }
-      textarea { min-height: 220px; resize: vertical; padding: 14px; border-radius: 14px; border: 1px solid #d1d5db; font: inherit; }
-      input[type="file"] { padding: 10px 0; }
-      button { margin-top: 18px; padding: 12px 18px; border: 0; border-radius: 14px; background: #111827; color: white; font: inherit; font-weight: 700; cursor: pointer; }
-      button:hover { background: #0f172a; }
-      pre { margin-top: 20px; white-space: pre-wrap; word-break: break-word; background: #0f172a; color: #e2e8f0; padding: 18px; border-radius: 14px; overflow: auto; }
-      .subtle { color: #64748b; }
-      .grid { display: grid; gap: 20px; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); }
-      .tag { display: inline-block; margin-right: 8px; margin-bottom: 8px; padding: 6px 10px; border-radius: 999px; background: #e0e7ff; color: #3730a3; font-size: 12px; font-weight: 700; }
-      .result-grid { display: grid; gap: 12px; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); margin-top: 16px; }
-      .result-card { background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 14px; padding: 14px; }
-      .result-label { display: block; font-size: 12px; text-transform: uppercase; letter-spacing: 0.08em; color: #64748b; margin-bottom: 8px; }
-      .result-value { font-size: 16px; font-weight: 700; color: #0f172a; word-break: break-word; }
-      .error { margin-top: 16px; padding: 12px 14px; border-radius: 12px; background: #fef2f2; color: #991b1b; display: none; }
-      .result-card.deadline-active { border-color: #86efac; background: #f0fdf4; }
-      .result-card.deadline-expired { border-color: #fecaca; background: #fef2f2; }
-      .result-card.deadline-today { border-color: #fde68a; background: #fffbeb; }
-      .meta-row { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 8px; align-items: center; }
-      .status-pill { display: inline-flex; align-items: center; gap: 8px; padding: 6px 10px; border-radius: 999px; font-size: 12px; font-weight: 700; }
-      .status-pill.active { background: #dcfce7; color: #166534; }
-      .status-pill.expired { background: #fee2e2; color: #991b1b; }
-      .status-pill.today { background: #fef3c7; color: #92400e; }
-      .quick-apply { display: inline-flex; align-items: center; justify-content: center; margin-top: 10px; padding: 10px 14px; border-radius: 12px; background: #1d4ed8; color: white; text-decoration: none; font-weight: 700; }
-      .quick-apply:hover { background: #1e40af; }
-      .quick-apply.active { background: #16a34a; }
-      .quick-apply.active:hover { background: #15803d; }
-      .quick-apply.closed { background: #dc2626; }
-      .quick-apply.closed:hover { background: #b91c1c; }
-      .quick-apply.today { background: #d97706; }
-      .quick-apply.today:hover { background: #b45309; }
-      .registration-value.active { color: #15803d; }
-      .registration-value.closed { color: #b91c1c; }
-      .registration-value.today { color: #b45309; }
-      .summary-box { margin-top: 16px; padding: 16px; border-radius: 16px; background: #f8fafc; border: 1px solid #e2e8f0; }
-      .summary-box h3 { margin: 0 0 8px; }
-      .summary-box p { margin: 0; color: #334155; line-height: 1.6; }
-      .timer-wrap { margin-top: 12px; display: none; }
-      .timer-label { font-size: 12px; font-weight: 700; color: #92400e; margin-bottom: 8px; }
-        .summary-list { margin: 12px 0 0; padding-left: 18px; color: #334155; }
-        .summary-list li { margin-bottom: 6px; }
-      .summary-grid { display: grid; gap: 12px; margin-top: 12px; }
-      .summary-section { padding: 12px; border-radius: 12px; background: white; border: 1px solid #e2e8f0; }
-      .summary-section h4 { margin: 0 0 8px; font-size: 14px; color: #0f172a; }
-      .summary-section p { margin: 0; color: #334155; line-height: 1.6; }
-      .timer-bar { width: 100%; height: 12px; border-radius: 999px; background: #fde68a; overflow: hidden; }
-      .timer-fill { height: 100%; width: 0%; background: linear-gradient(90deg, #f59e0b, #ef4444); transition: width 0.4s ease; }
-      .timer-text { margin-top: 8px; font-size: 13px; font-weight: 700; color: #92400e; }
-    </style>
-  </head>
-  <body>
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>FillForm</title>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    body { font-family: 'Segoe UI', system-ui, -apple-system, sans-serif; background: #f0f2f5; color: #1a1a2e; min-height: 100vh; }
+
+    /* Nav */
+    .nav { display: flex; align-items: center; justify-content: space-between; padding: 16px 32px; background: #fff; border-bottom: 1px solid #e5e7eb; position: sticky; top: 0; z-index: 100; }
+    .nav-brand { font-size: 20px; font-weight: 800; color: #1a1a2e; letter-spacing: -0.5px; }
+    .nav-user { display: flex; align-items: center; gap: 12px; }
+    .nav-user img { width: 32px; height: 32px; border-radius: 50%; }
+    .nav-user span { font-size: 14px; font-weight: 600; }
+    .nav-logout { padding: 6px 14px; border: 1px solid #e5e7eb; border-radius: 8px; background: #fff; font-size: 13px; font-weight: 600; cursor: pointer; color: #6b7280; }
+    .nav-logout:hover { background: #f9fafb; border-color: #d1d5db; }
+
+    /* Container */
+    .container { max-width: 900px; margin: 0 auto; padding: 32px 20px 64px; }
+
+    /* Auth screens */
+    .auth-screen { display: flex; align-items: center; justify-content: center; min-height: calc(100vh - 65px); }
+    .auth-card { background: #fff; border-radius: 16px; padding: 48px 40px; box-shadow: 0 1px 3px rgba(0,0,0,0.08); text-align: center; max-width: 420px; width: 100%; }
+    .auth-card h1 { font-size: 28px; font-weight: 800; margin-bottom: 8px; }
+    .auth-card p { color: #6b7280; font-size: 14px; margin-bottom: 32px; line-height: 1.5; }
+    .google-btn { display: inline-flex; align-items: center; gap: 12px; padding: 12px 28px; border: 1px solid #d1d5db; border-radius: 10px; background: #fff; font-size: 15px; font-weight: 600; cursor: pointer; color: #374151; transition: box-shadow 0.15s; }
+    .google-btn:hover { box-shadow: 0 2px 8px rgba(0,0,0,0.1); }
+    .google-btn svg { width: 20px; height: 20px; }
+
+    /* Profile form */
+    .profile-card { background: #fff; border-radius: 16px; padding: 40px; box-shadow: 0 1px 3px rgba(0,0,0,0.08); max-width: 520px; width: 100%; }
+    .profile-card h2 { font-size: 22px; font-weight: 700; margin-bottom: 4px; }
+    .profile-card .subtitle { color: #6b7280; font-size: 14px; margin-bottom: 28px; }
+    .form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+    .form-group { display: flex; flex-direction: column; gap: 6px; }
+    .form-group.full { grid-column: 1 / -1; }
+    .form-group label { font-size: 13px; font-weight: 600; color: #374151; }
+    .form-group input { padding: 10px 14px; border: 1px solid #d1d5db; border-radius: 8px; font-size: 14px; outline: none; transition: border-color 0.15s; }
+    .form-group input:focus { border-color: #6366f1; }
+    .form-submit { margin-top: 24px; width: 100%; padding: 12px; border: none; border-radius: 10px; background: #6366f1; color: #fff; font-size: 15px; font-weight: 700; cursor: pointer; }
+    .form-submit:hover { background: #4f46e5; }
+
+    /* Hero */
+    .hero { margin-bottom: 28px; }
+    .hero h1 { font-size: 26px; font-weight: 800; margin-bottom: 6px; }
+    .hero p { color: #6b7280; font-size: 14px; }
+
+    /* Input section */
+    .input-section { background: #fff; border-radius: 16px; padding: 28px; box-shadow: 0 1px 3px rgba(0,0,0,0.08); margin-bottom: 24px; }
+    .input-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 24px; }
+    .input-grid label { display: block; font-size: 13px; font-weight: 600; color: #374151; margin-bottom: 8px; }
+    .input-grid textarea { width: 100%; min-height: 180px; padding: 14px; border: 1px solid #d1d5db; border-radius: 10px; font: inherit; font-size: 14px; resize: vertical; outline: none; }
+    .input-grid textarea:focus { border-color: #6366f1; }
+    .input-grid input[type="file"] { font-size: 14px; }
+    .analyze-btn { margin-top: 16px; padding: 12px 24px; border: none; border-radius: 10px; background: #1a1a2e; color: #fff; font-size: 14px; font-weight: 700; cursor: pointer; width: 100%; }
+    .analyze-btn:hover { background: #16213e; }
+    .analyze-btn:disabled { opacity: 0.5; cursor: not-allowed; }
+    .spinner { width: 20px; height: 20px; border: 3px solid #e5e7eb; border-top-color: #6366f1; border-radius: 50%; animation: spin 0.6s linear infinite; display: inline-block; vertical-align: middle; margin-right: 8px; }
+    @keyframes spin { to { transform: rotate(360deg); } }
+
+    /* Result cards */
+    .results { display: none; }
+    .results.visible { display: block; }
+    .section-title { font-size: 16px; font-weight: 700; margin-bottom: 14px; color: #1a1a2e; }
+    .card { background: #fff; border-radius: 14px; padding: 24px; box-shadow: 0 1px 3px rgba(0,0,0,0.08); margin-bottom: 20px; transition: box-shadow 0.15s; }
+    .card:hover { box-shadow: 0 4px 12px rgba(0,0,0,0.1); }
+    .card-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(160px, 1fr)); gap: 16px; }
+    .card-field-label { font-size: 11px; text-transform: uppercase; letter-spacing: 0.08em; color: #9ca3af; font-weight: 600; margin-bottom: 6px; }
+    .card-field-value { font-size: 15px; font-weight: 600; color: #1a1a2e; word-break: break-word; }
+
+    /* Deadline card */
+    .deadline-card { border-left: 4px solid #d1d5db; }
+    .deadline-card.active { border-left-color: #22c55e; }
+    .deadline-card.today { border-left-color: #f59e0b; }
+    .deadline-card.expired { border-left-color: #ef4444; }
+    .status-pill { display: inline-flex; align-items: center; gap: 6px; padding: 4px 12px; border-radius: 999px; font-size: 12px; font-weight: 700; }
+    .status-pill.active { background: #dcfce7; color: #166534; }
+    .status-pill.today { background: #fef3c7; color: #92400e; }
+    .status-pill.expired { background: #fee2e2; color: #991b1b; }
+    .timer-bar { width: 100%; height: 8px; border-radius: 999px; background: #e5e7eb; overflow: hidden; margin-top: 12px; }
+    .timer-fill { height: 100%; width: 0%; background: linear-gradient(90deg, #f59e0b, #ef4444); transition: width 0.4s ease; }
+    .timer-text { margin-top: 6px; font-size: 13px; font-weight: 600; color: #6b7280; }
+    .deadline-actions { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 16px; align-items: center; }
+
+    /* Buttons */
+    .btn-calendar { display: inline-flex; align-items: center; gap: 8px; padding: 10px 16px; border-radius: 10px; background: #fff; border: 1px solid #d1d5db; font-size: 13px; font-weight: 700; cursor: pointer; color: #374151; transition: all 0.15s; }
+    .btn-calendar:hover { background: #f9fafb; border-color: #a5b4fc; color: #4f46e5; }
+    .btn-calendar.connected { border-color: #818cf8; color: #4f46e5; }
+    .btn-calendar.added { background: #dcfce7; border-color: #86efac; color: #166534; cursor: default; }
+    .btn-connect-cal { display: inline-flex; align-items: center; gap: 8px; padding: 10px 16px; border-radius: 10px; background: #f0f0ff; border: 1px solid #c7d2fe; font-size: 13px; font-weight: 700; cursor: pointer; color: #4338ca; }
+    .btn-connect-cal:hover { background: #e0e7ff; }
+    .btn-apply { display: inline-flex; align-items: center; justify-content: center; padding: 10px 18px; border-radius: 10px; background: #1a1a2e; color: #fff; text-decoration: none; font-size: 13px; font-weight: 700; transition: background 0.15s; }
+    .btn-apply:hover { background: #16213e; }
+
+    /* Summary */
+    .summary-section { padding: 14px; border-radius: 10px; background: #f9fafb; border: 1px solid #e5e7eb; margin-bottom: 12px; }
+    .summary-section h4 { font-size: 13px; font-weight: 700; color: #374151; margin-bottom: 8px; }
+    .summary-section p, .summary-section li { font-size: 14px; color: #4b5563; line-height: 1.6; }
+    .summary-list { padding-left: 18px; }
+
+    /* Toast */
+    .toast-container { position: fixed; bottom: 24px; right: 24px; z-index: 1000; display: flex; flex-direction: column; gap: 8px; }
+    .toast { padding: 14px 20px; border-radius: 10px; font-size: 14px; font-weight: 600; color: #fff; box-shadow: 0 4px 12px rgba(0,0,0,0.15); animation: slideIn 0.3s ease, fadeOut 0.3s ease 2.7s forwards; }
+    .toast.success { background: #16a34a; }
+    .toast.error { background: #dc2626; }
+    @keyframes slideIn { from { transform: translateX(100%); opacity: 0; } to { transform: translateX(0); opacity: 1; } }
+    @keyframes fadeOut { to { opacity: 0; transform: translateY(10px); } }
+
+    /* Error */
+    .error-box { display: none; padding: 12px 16px; border-radius: 10px; background: #fef2f2; color: #991b1b; font-size: 14px; margin-top: 16px; }
+
+    /* Mobile */
+    @media (max-width: 640px) {
+      .nav { padding: 12px 16px; }
+      .container { padding: 20px 16px 48px; }
+      .input-grid { grid-template-columns: 1fr; }
+      .card-grid { grid-template-columns: 1fr; }
+      .form-grid { grid-template-columns: 1fr; }
+      .auth-card { padding: 32px 24px; }
+      .profile-card { padding: 28px 20px; }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Toast container -->
+  <div class="toast-container" id="toast-container"></div>
+
+  <!-- Loading state (before auth check) -->
+  <div id="app-loading" class="auth-screen">
+    <div class="spinner" style="width:32px;height:32px;border-width:4px;"></div>
+  </div>
+
+  <!-- Login screen -->
+  <div id="login-screen" class="auth-screen" style="display:none;">
+    <div class="auth-card">
+      <h1>FillForm</h1>
+      <p>AI-powered form automation. Sign in to save your profile and track deadlines.</p>
+      <button class="google-btn" id="google-login-btn">
+        <svg viewBox="0 0 24 24"><path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92a5.06 5.06 0 0 1-2.2 3.32v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.1z"/><path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/><path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z"/><path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"/></svg>
+        Sign in with Google
+      </button>
+    </div>
+  </div>
+
+  <!-- Profile creation screen -->
+  <div id="profile-screen" class="auth-screen" style="display:none;">
+    <div class="profile-card">
+      <h2>Create your profile</h2>
+      <p class="subtitle">We'll use this to check eligibility and autofill forms for you.</p>
+      <div class="form-grid">
+        <div class="form-group full">
+          <label for="pf-name">Full Name</label>
+          <input id="pf-name" type="text" placeholder="John Doe" />
+        </div>
+        <div class="form-group full">
+          <label for="pf-email">Email</label>
+          <input id="pf-email" type="email" placeholder="john@example.com" />
+        </div>
+        <div class="form-group">
+          <label for="pf-phone">Phone</label>
+          <input id="pf-phone" type="tel" placeholder="+91 98765 43210" />
+        </div>
+        <div class="form-group">
+          <label for="pf-degree">Degree</label>
+          <input id="pf-degree" type="text" placeholder="B.Tech" />
+        </div>
+        <div class="form-group">
+          <label for="pf-branch">Branch</label>
+          <input id="pf-branch" type="text" placeholder="Computer Science" />
+        </div>
+        <div class="form-group">
+          <label for="pf-batch">Batch</label>
+          <input id="pf-batch" type="text" placeholder="2022-2026" />
+        </div>
+        <div class="form-group">
+          <label for="pf-percentage">Percentage / CGPA</label>
+          <input id="pf-percentage" type="text" placeholder="8.5 CGPA" />
+        </div>
+        <div class="form-group">
+          <label for="pf-backlogs">Backlogs</label>
+          <input id="pf-backlogs" type="text" placeholder="None" />
+        </div>
+      </div>
+      <button class="form-submit" id="profile-submit">Save Profile</button>
+    </div>
+  </div>
+
+  <!-- Main app -->
+  <div id="main-app" style="display:none;">
+    <nav class="nav">
+      <div class="nav-brand">FillForm</div>
+      <div class="nav-user">
+        <img id="nav-avatar" src="" alt="" />
+        <span id="nav-name"></span>
+        <button class="nav-logout" id="nav-logout">Logout</button>
+      </div>
+    </nav>
+
     <main class="container">
       <section class="hero">
-        <span class="tag">PDF</span>
-        <span class="tag">Text</span>
-        <span class="tag">Analysis</span>
-        <h1>FillForm</h1>
-        <p class="subtle">Paste a document or upload a PDF to extract text, find deadlines, and generate autofill hints.</p>
+        <h1>Analyze a form or job posting</h1>
+        <p>Paste text or upload a PDF to extract deadlines, eligibility, and get autofill hints.</p>
       </section>
 
-      <section class="panel grid">
-        <div>
-          <label for="text">Text input</label>
-          <textarea id="text" placeholder="Paste a form, application, or notes here..."></textarea>
+      <section class="input-section">
+        <div class="input-grid">
+          <div>
+            <label for="text">Text input</label>
+            <textarea id="text" placeholder="Paste a job description, application form, or notes here..."></textarea>
+          </div>
+          <div>
+            <label for="file">PDF input</label>
+            <input id="file" type="file" accept="application/pdf" />
+            <button class="analyze-btn" id="submit">
+              <span id="btn-label">Analyze</span>
+            </button>
+          </div>
         </div>
-        <div>
-          <label for="file">PDF input</label>
-          <input id="file" type="file" accept="application/pdf" />
-          <button id="submit">Analyze input</button>
-          <div class="result-grid">
-            <div class="result-card">
-              <span class="result-label">Company</span>
-              <div class="result-value" id="company">-</div>
+      </section>
+
+      <div class="error-box" id="error-box"></div>
+
+      <div class="results" id="results">
+        <!-- Job Overview -->
+        <h3 class="section-title">Job Overview</h3>
+        <div class="card">
+          <div class="card-grid">
+            <div>
+              <div class="card-field-label">Company</div>
+              <div class="card-field-value" id="r-company">—</div>
             </div>
-            <div class="result-card">
-              <span class="result-label">Role</span>
-              <div class="result-value" id="role">-</div>
+            <div>
+              <div class="card-field-label">Role</div>
+              <div class="card-field-value" id="r-role">—</div>
             </div>
-            <div class="result-card">
-              <span class="result-label">Deadline</span>
-              <div class="result-value" id="deadline">-</div>
-              <div class="meta-row">
-                <span class="status-pill" id="deadline-status">Not checked</span>
+            <div>
+              <div class="card-field-label">CTC</div>
+              <div class="card-field-value" id="r-ctc">—</div>
+            </div>
+            <div>
+              <div class="card-field-label">Eligibility</div>
+              <div class="card-field-value" id="r-eligibility">—</div>
+            </div>
+            <div>
+              <div class="card-field-label">Criteria</div>
+              <div class="card-field-value" id="r-criteria">—</div>
+            </div>
+            <div>
+              <div class="card-field-label">Registration</div>
+              <div class="card-field-value" id="r-registration">—</div>
+              <div style="margin-top:8px;">
+                <a class="btn-apply" id="r-apply" href="#" target="_blank" rel="noreferrer" style="display:none;">Quick Apply →</a>
               </div>
-              <div class="timer-wrap" id="timer-wrap">
-                <div class="timer-label">Time left today</div>
-                <div class="timer-bar"><div class="timer-fill" id="timer-fill"></div></div>
-                <div class="timer-text" id="timer-text"></div>
-              </div>
-            </div>
-            <div class="result-card">
-              <span class="result-label">CTC</span>
-              <div class="result-value" id="ctc">-</div>
-            </div>
-            <div class="result-card">
-              <span class="result-label">Eligibility</span>
-              <div class="result-value" id="eligibility">-</div>
-            </div>
-            <div class="result-card">
-              <span class="result-label">Criteria</span>
-              <div class="result-value" id="criteria">-</div>
-            </div>
-            <div class="result-card">
-              <span class="result-label">Registration Link</span>
-              <div class="result-value" id="registration-link">-</div>
-              <div class="meta-row">
-                <span class="status-pill" id="registration-status">Not checked</span>
-              </div>
-              <a class="quick-apply" id="quick-apply" href="#" target="_blank" rel="noreferrer" style="display:none;">Quick Apply</a>
-            </div>
-            <div class="result-card">
-              <span class="result-label">Job Summary</span>
-              <div id="summary"></div>
             </div>
           </div>
-          <div class="error" id="page-warning" style="display:none;"></div>
-          <div class="error" id="error"></div>
-          <pre id="output">Submit text or a PDF to see the response here.</pre>
         </div>
-      </section>
-    </main>
 
-    <script>
-      const submitButton = document.getElementById('submit');
-      const output = document.getElementById('output');
-      const company = document.getElementById('company');
-      const role = document.getElementById('role');
-      const deadline = document.getElementById('deadline');
-      const deadlineStatus = document.getElementById('deadline-status');
-      const timerWrap = document.getElementById('timer-wrap');
+        <!-- Deadline & Actions -->
+        <h3 class="section-title">Deadline & Actions</h3>
+        <div class="card deadline-card" id="deadline-card">
+          <div class="card-field-label">Deadline</div>
+          <div class="card-field-value" id="r-deadline">—</div>
+          <div style="margin-top:8px;">
+            <span class="status-pill" id="r-deadline-status">Not checked</span>
+          </div>
+          <div id="timer-section" style="display:none; margin-top:12px;">
+            <div class="timer-bar"><div class="timer-fill" id="timer-fill"></div></div>
+            <div class="timer-text" id="timer-text"></div>
+          </div>
+          <div class="deadline-actions" id="deadline-actions"></div>
+        </div>
+
+        <!-- Job Summary -->
+        <h3 class="section-title">Job Summary</h3>
+        <div class="card" id="summary-card">
+          <div id="r-summary"></div>
+        </div>
+      </div>
+    </main>
+  </div>
+
+  <script>
+    const API = window.FILLFORM_API_BASE_URL || (function() {
+      try {
+        if (window.location.protocol.startsWith('http') && (window.location.port === '5000' || window.location.host.includes(':5000'))) {
+          return window.location.origin;
+        }
+      } catch (e) {}
+      return 'http://127.0.0.1:5000';
+    })();
+
+    let currentUser = null;
+    let deadlineTimerId = null;
+
+    // ── Toast ──
+    function showToast(message, type = 'success') {
+      const container = document.getElementById('toast-container');
+      const toast = document.createElement('div');
+      toast.className = `toast ${type}`;
+      toast.textContent = message;
+      container.appendChild(toast);
+      setTimeout(() => toast.remove(), 3000);
+    }
+
+    // ── Auth ──
+    async function checkAuth() {
+      try {
+        const res = await fetch(`${API}/api/auth/me`);
+        if (res.ok) {
+          currentUser = await res.json();
+          if (currentUser.profile) {
+            showMainApp();
+          } else {
+            showProfileForm();
+          }
+        } else {
+          showLogin();
+        }
+      } catch (e) {
+        showLogin();
+      }
+    }
+
+    function showLogin() {
+      document.getElementById('app-loading').style.display = 'none';
+      document.getElementById('login-screen').style.display = 'flex';
+      document.getElementById('profile-screen').style.display = 'none';
+      document.getElementById('main-app').style.display = 'none';
+    }
+
+    function showProfileForm() {
+      document.getElementById('app-loading').style.display = 'none';
+      document.getElementById('login-screen').style.display = 'none';
+      document.getElementById('profile-screen').style.display = 'flex';
+      document.getElementById('main-app').style.display = 'none';
+      if (currentUser) {
+        document.getElementById('pf-name').value = currentUser.name || '';
+        document.getElementById('pf-email').value = currentUser.email || '';
+      }
+    }
+
+    function showMainApp() {
+      document.getElementById('app-loading').style.display = 'none';
+      document.getElementById('login-screen').style.display = 'none';
+      document.getElementById('profile-screen').style.display = 'none';
+      document.getElementById('main-app').style.display = 'block';
+      if (currentUser) {
+        document.getElementById('nav-name').textContent = currentUser.name || currentUser.email;
+        const avatar = document.getElementById('nav-avatar');
+        if (currentUser.picture) {
+          avatar.src = currentUser.picture;
+          avatar.style.display = 'inline';
+        } else {
+          avatar.style.display = 'none';
+        }
+      }
+    }
+
+    document.getElementById('google-login-btn').addEventListener('click', async () => {
+      const res = await fetch(`${API}/api/auth/login`);
+      const data = await res.json();
+      if (data.auth_url) window.location.href = data.auth_url;
+    });
+
+    document.getElementById('profile-submit').addEventListener('click', async () => {
+      const profileData = {
+        name: document.getElementById('pf-name').value,
+        email: document.getElementById('pf-email').value,
+        phone: document.getElementById('pf-phone').value,
+        degree: document.getElementById('pf-degree').value,
+        branch: document.getElementById('pf-branch').value,
+        batch: document.getElementById('pf-batch').value,
+        percentage: document.getElementById('pf-percentage').value,
+        backlog_rule: document.getElementById('pf-backlogs').value,
+      };
+      const res = await fetch(`${API}/api/auth/profile`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(profileData),
+      });
+      if (res.ok) {
+        const profile = await res.json();
+        currentUser.profile = profile;
+        showMainApp();
+      } else {
+        showToast('Failed to save profile', 'error');
+      }
+    });
+
+    document.getElementById('nav-logout').addEventListener('click', async () => {
+      await fetch(`${API}/api/auth/logout`, { method: 'POST' });
+      currentUser = null;
+      showLogin();
+    });
+
+    // ── Helpers ──
+    function format12Hour(date) {
+      const pad = (v) => String(v).padStart(2, '0');
+      const h24 = date.getHours();
+      const h12 = h24 % 12 || 12;
+      const mer = h24 >= 12 ? 'p.m.' : 'a.m.';
+      return `${date.toLocaleDateString(undefined, { month: 'short', day: 'numeric', year: 'numeric' })}, ${h12}:${pad(date.getMinutes())} ${mer}`;
+    }
+
+    function formatCompactDuration(ms) {
+      if (ms <= 0) return 'Deadline passed';
+      const totalMin = Math.floor(ms / 60000);
+      const days = Math.floor(totalMin / 1440);
+      const hours = Math.floor((totalMin % 1440) / 60);
+      const minutes = totalMin % 60;
+      const parts = [];
+      if (days) parts.push(`${days}d`);
+      if (hours) parts.push(`${hours}h`);
+      parts.push(`${minutes}m`);
+      return parts.join(' ');
+    }
+
+    function getDeadlineStatus(date) {
+      const now = new Date();
+      const startOfToday = new Date(now); startOfToday.setHours(0, 0, 0, 0);
+      const startOfDeadline = new Date(date); startOfDeadline.setHours(0, 0, 0, 0);
+      if (date < now) return 'expired';
+      if (startOfToday.getTime() === startOfDeadline.getTime()) return 'today';
+      return 'active';
+    }
+
+    function clearDeadlineTimer() {
+      if (deadlineTimerId) { clearInterval(deadlineTimerId); deadlineTimerId = null; }
+    }
+
+    // ── Analysis ──
+    document.getElementById('submit').addEventListener('click', async () => {
+      const formData = new FormData();
+      const text = document.getElementById('text').value;
+      const file = document.getElementById('file').files[0];
+      if (text) formData.append('text', text);
+      if (file) formData.append('file', file);
+
+      const btn = document.getElementById('submit');
+      const btnLabel = document.getElementById('btn-label');
+      btn.disabled = true;
+      btnLabel.innerHTML = '<span class="spinner"></span> Analyzing...';
+      document.getElementById('results').classList.remove('visible');
+      document.getElementById('error-box').style.display = 'none';
+
+      try {
+        const response = await fetch(`${API}/api/analyze`, { method: 'POST', body: formData });
+        if (!response.ok) {
+          const body = await response.text();
+          throw new Error(body || `Request failed with status ${response.status}`);
+        }
+        const data = await response.json();
+        renderResults(data.extracted);
+      } catch (error) {
+        const msg = error instanceof Error ? error.message : 'Failed to fetch data.';
+        document.getElementById('error-box').textContent = msg;
+        document.getElementById('error-box').style.display = 'block';
+      } finally {
+        btn.disabled = false;
+        btnLabel.textContent = 'Analyze';
+      }
+    });
+
+    // ── Render ──
+    function renderResults(ex) {
+      document.getElementById('results').classList.add('visible');
+      document.getElementById('r-company').textContent = ex?.company || '—';
+      document.getElementById('r-role').textContent = ex?.role || '—';
+      document.getElementById('r-ctc').textContent = ex?.ctc || '—';
+
+      const elig = [];
+      if (ex?.eligibility?.batch) elig.push(`Batch: ${ex.eligibility.batch}`);
+      if (ex?.eligibility?.branches?.length) elig.push(`Branches: ${ex.eligibility.branches.join(', ')}`);
+      if (ex?.eligibility?.degree) elig.push(`Degree: ${ex.eligibility.degree}`);
+      document.getElementById('r-eligibility').textContent = elig.length ? elig.join(' | ') : '—';
+
+      const crit = [];
+      if (ex?.criteria?.percentage) crit.push(`Percentage: ${ex.criteria.percentage}`);
+      if (ex?.criteria?.backlog_rule) crit.push(`Backlog: ${ex.criteria.backlog_rule}`);
+      document.getElementById('r-criteria').textContent = crit.length ? crit.join(' | ') : '—';
+
+      // Registration
+      const regLink = ex?.registration_link;
+      const regEl = document.getElementById('r-registration');
+      const applyBtn = document.getElementById('r-apply');
+      regEl.textContent = regLink || '—';
+      if (regLink) {
+        applyBtn.style.display = 'inline-flex';
+        applyBtn.href = regLink;
+      } else {
+        applyBtn.style.display = 'none';
+      }
+
+      // Summary
+      renderSummary(ex?.job_summary);
+
+      // Deadline
+      renderDeadline(ex);
+    }
+
+    function renderDeadline(ex) {
+      clearDeadlineTimer();
+      const card = document.getElementById('deadline-card');
+      const statusEl = document.getElementById('r-deadline-status');
+      const timerSection = document.getElementById('timer-section');
       const timerFill = document.getElementById('timer-fill');
       const timerText = document.getElementById('timer-text');
-      const ctc = document.getElementById('ctc');
-      const eligibility = document.getElementById('eligibility');
-      const criteria = document.getElementById('criteria');
-      const registrationLink = document.getElementById('registration-link');
-      const registrationStatus = document.getElementById('registration-status');
-      const quickApply = document.getElementById('quick-apply');
-      const summary = document.getElementById('summary');
-      const pageWarning = document.getElementById('page-warning');
-      const errorBox = document.getElementById('error');
-      let deadlineTimerId = null;
+      const actionsEl = document.getElementById('deadline-actions');
 
-      const API_BASE_URL = window.FILLFORM_API_BASE_URL || (function() {
-        // If the page is already served from the backend (port 5000), use that origin.
-        try {
-          const loc = window.location;
-          if (loc.protocol.startsWith('http') && (loc.port === '5000' || loc.host.includes(':5000'))) {
-            return loc.origin;
+      card.className = 'card deadline-card';
+      statusEl.className = 'status-pill';
+      timerSection.style.display = 'none';
+      timerFill.style.width = '0%';
+      timerText.textContent = '';
+      actionsEl.innerHTML = '';
+
+      const deadlineEl = document.getElementById('r-deadline');
+
+      if (!ex?.deadline) {
+        deadlineEl.textContent = '—';
+        statusEl.textContent = 'Not checked';
+        return;
+      }
+
+      const deadlineDate = new Date(ex.deadline);
+      if (Number.isNaN(deadlineDate.getTime())) {
+        deadlineEl.textContent = ex.deadline;
+        return;
+      }
+
+      deadlineEl.textContent = format12Hour(deadlineDate);
+      const status = getDeadlineStatus(deadlineDate);
+
+      if (status === 'expired') {
+        statusEl.textContent = 'Closed';
+        statusEl.classList.add('expired');
+        card.classList.add('expired');
+      } else if (status === 'today') {
+        statusEl.textContent = 'Deadline today';
+        statusEl.classList.add('today');
+        card.classList.add('today');
+        timerSection.style.display = 'block';
+        const deadlineTime = deadlineDate.getTime();
+        const startOfDay = new Date(deadlineDate); startOfDay.setHours(0, 0, 0, 0);
+        const totalWindow = Math.max(deadlineTime - startOfDay.getTime(), 1);
+        const updateTimer = () => {
+          const now = new Date();
+          const remaining = deadlineTime - now.getTime();
+          const elapsed = now.getTime() - startOfDay.getTime();
+          timerFill.style.width = `${Math.min(Math.max((elapsed / totalWindow) * 100, 0), 100)}%`;
+          timerText.textContent = remaining > 0 ? `${formatCompactDuration(remaining)} left` : 'Deadline passed';
+          if (remaining <= 0) {
+            statusEl.textContent = 'Closed';
+            statusEl.className = 'status-pill expired';
+            card.className = 'card deadline-card expired';
+            clearDeadlineTimer();
           }
-        } catch (e) {
-          /* ignore */
-        }
-        // Otherwise, point explicitly at the backend dev server.
-        return 'http://127.0.0.1:5000';
-      })();
-
-      function showPageWarning() {
-        if (window.location.protocol === 'file:') {
-          pageWarning.style.display = 'block';
-          pageWarning.textContent = 'Warning: You opened this page directly from your computer. Please run the backend and open the app at http://127.0.0.1:5000 instead.';
-          submitButton.disabled = true;
-          return;
-        }
-
-        pageWarning.style.display = 'none';
-        pageWarning.textContent = '';
-        submitButton.disabled = false;
-      }
-
-      showPageWarning();
-
-      function format12Hour(date) {
-        const pad = (value) => String(value).padStart(2, '0');
-        const hours24 = date.getHours();
-        const hours12 = hours24 % 12 || 12;
-        const meridiem = hours24 >= 12 ? 'p.m.' : 'a.m.';
-        return `${date.toLocaleDateString(undefined, { month: 'short', day: 'numeric', year: 'numeric' })}, ${hours12}:${pad(date.getMinutes())} ${meridiem}`;
-      }
-
-      function formatCompactDuration(milliseconds) {
-        if (milliseconds <= 0) return 'Deadline passed';
-        const totalMinutes = Math.floor(milliseconds / 60000);
-        const days = Math.floor(totalMinutes / 1440);
-        const hours = Math.floor((totalMinutes % 1440) / 60);
-        const minutes = totalMinutes % 60;
-        const parts = [];
-        if (days) parts.push(`${days}d`);
-        if (hours) parts.push(`${hours}h`);
-        parts.push(`${minutes}m`);
-        return parts.join(' ');
-      }
-
-      function getDeadlineStatus(date) {
-        const now = new Date();
-        const startOfToday = new Date(now);
-        startOfToday.setHours(0, 0, 0, 0);
-        const startOfDeadlineDay = new Date(date);
-        startOfDeadlineDay.setHours(0, 0, 0, 0);
-
-        if (date < now) return 'expired';
-        if (startOfToday.getTime() === startOfDeadlineDay.getTime()) return 'today';
-        return 'active';
-      }
-
-      function clearDeadlineTimer() {
-        if (deadlineTimerId) {
-          clearInterval(deadlineTimerId);
-          deadlineTimerId = null;
-        }
-      }
-
-      function renderSummary(details) {
-        summary.innerHTML = '';
-
-        if (!details) {
-          summary.textContent = '-';
-          return;
-        }
-
-        const wrapper = document.createElement('div');
-        wrapper.className = 'summary-grid';
-
-        const createSection = (title, content) => {
-          if (!content || (Array.isArray(content) && content.length === 0)) {
-            return;
-          }
-
-          const section = document.createElement('div');
-          section.className = 'summary-section';
-
-          const heading = document.createElement('h4');
-          heading.textContent = title;
-          section.appendChild(heading);
-
-          if (Array.isArray(content)) {
-            const list = document.createElement('ul');
-            list.className = 'summary-list';
-            content.forEach((item) => {
-              const listItem = document.createElement('li');
-              listItem.textContent = item;
-              list.appendChild(listItem);
-            });
-            section.appendChild(list);
-          } else {
-            const paragraph = document.createElement('p');
-            paragraph.textContent = content;
-            section.appendChild(paragraph);
-          }
-
-          wrapper.appendChild(section);
         };
-
-        createSection('Overview', details.overview);
-        createSection('Highlights', details.highlights);
-        createSection('Responsibilities', details.responsibilities);
-        createSection('Requirements', details.requirements);
-        createSection('Benefits', details.benefits);
-
-        summary.appendChild(wrapper);
+        updateTimer();
+        deadlineTimerId = setInterval(updateTimer, 1000);
+      } else {
+        statusEl.textContent = 'Active';
+        statusEl.classList.add('active');
+        card.classList.add('active');
       }
 
-      function setRegistrationState(status, deadlineStatusValue) {
-        registrationStatus.className = 'status-pill';
-        quickApply.className = 'quick-apply';
-        registrationLink.className = 'result-value registration-value';
-
-        if (status === 'closed') {
-          registrationStatus.textContent = 'Closed';
-          registrationStatus.classList.add('expired');
-          quickApply.classList.add('closed');
-          registrationLink.classList.add('closed');
-        } else if (status === 'today') {
-          registrationStatus.textContent = 'Closes today';
-          registrationStatus.classList.add('today');
-          quickApply.classList.add('today');
-          registrationLink.classList.add('today');
-        } else if (status === 'active') {
-          registrationStatus.textContent = 'Active';
-          registrationStatus.classList.add('active');
-          quickApply.classList.add('active');
-          registrationLink.classList.add('active');
-        } else {
-          registrationStatus.textContent = 'Not checked';
-        }
-
-        if (deadlineStatusValue === 'expired') {
-          quickApply.classList.add('closed');
-        }
+      // Calendar buttons
+      if (status === 'active' || status === 'today') {
+        renderCalendarActions(actionsEl, ex, status);
       }
+    }
 
-      function renderStructuredDetails(details) {
-        company.textContent = details?.company || '-';
-        role.textContent = details?.role || 'Not detected';
-        ctc.textContent = details?.ctc || '-';
-        registrationLink.textContent = details?.registration_link || '-';
-        quickApply.style.display = details?.registration_link ? 'inline-flex' : 'none';
-        quickApply.href = details?.registration_link || '#';
-        renderSummary(details?.job_summary);
+    async function renderCalendarActions(container, ex, deadlineStatus) {
+      if (!currentUser?.profile?.id) return;
 
-        const eligibilityText = [];
-        if (details?.eligibility?.batch) eligibilityText.push(`Batch: ${details.eligibility.batch}`);
-        if (details?.eligibility?.branches?.length) eligibilityText.push(`Branches: ${details.eligibility.branches.join(', ')}`);
-        if (details?.eligibility?.degree) eligibilityText.push(`Degree: ${details.eligibility.degree}`);
-        eligibility.textContent = eligibilityText.length ? eligibilityText.join(' | ') : '-';
+      const profileId = currentUser.profile.id;
+      try {
+        const res = await fetch(`${API}/api/calendar/status?profile_id=${profileId}`);
+        const data = await res.json();
 
-        const criteriaText = [];
-        if (details?.criteria?.percentage) criteriaText.push(`Percentage: ${details.criteria.percentage}`);
-        if (details?.criteria?.backlog_rule) criteriaText.push(`Backlog: ${details.criteria.backlog_rule}`);
-        criteria.textContent = criteriaText.length ? criteriaText.join(' | ') : '-';
-
-        clearDeadlineTimer();
-        timerWrap.style.display = 'none';
-        timerFill.style.width = '0%';
-        timerText.textContent = '';
-        deadline.className = 'result-value';
-        deadlineStatus.className = 'status-pill';
-        registrationLink.className = 'result-value registration-value';
-        setRegistrationState(details?.registration_status);
-
-        if (details?.deadline) {
-          const deadlineDate = new Date(details.deadline);
-          if (!Number.isNaN(deadlineDate.getTime())) {
-            deadline.textContent = format12Hour(deadlineDate);
-            const status = getDeadlineStatus(deadlineDate);
-
-            if (status === 'expired') {
-              deadlineStatus.textContent = 'Closed';
-              deadlineStatus.classList.add('expired');
-              deadline.classList.add('deadline-expired');
-              setRegistrationState('closed', 'expired');
-            } else if (status === 'today') {
-              deadlineStatus.textContent = 'Deadline today';
-              deadlineStatus.classList.add('today');
-              deadline.classList.add('deadline-today');
-              setRegistrationState('today', 'today');
-              timerWrap.style.display = 'block';
-
-              const endOfDay = new Date(deadlineDate);
-              endOfDay.setHours(23, 59, 59, 999);
-              const deadlineTime = deadlineDate.getTime();
-              const startOfDay = new Date(deadlineDate);
-              startOfDay.setHours(0, 0, 0, 0);
-              const totalWindow = Math.max(deadlineTime - startOfDay.getTime(), 1);
-
-              const updateTimer = () => {
-                const now = new Date();
-                const remaining = deadlineTime - now.getTime();
-                const elapsed = now.getTime() - startOfDay.getTime();
-                const progress = Math.min(Math.max((elapsed / totalWindow) * 100, 0), 100);
-                timerFill.style.width = `${progress}%`;
-                timerText.textContent = remaining > 0
-                  ? `${formatCompactDuration(remaining)} left until deadline`
-                  : 'Deadline passed';
-                if (remaining <= 0) {
-                  deadlineStatus.textContent = 'Closed';
-                  deadlineStatus.className = 'status-pill expired';
-                  deadline.className = 'result-value deadline-expired';
-                  setRegistrationState('closed', 'expired');
-                  clearDeadlineTimer();
-                }
-              };
-
-              updateTimer();
-              deadlineTimerId = setInterval(updateTimer, 1000);
-            } else {
-              deadlineStatus.textContent = 'Active';
-              deadlineStatus.classList.add('active');
-              deadline.classList.add('deadline-active');
-              setRegistrationState('active');
+        if (data.connected) {
+          const btn = document.createElement('button');
+          btn.className = 'btn-calendar connected';
+          btn.innerHTML = 'Add to Google Calendar';
+          btn.addEventListener('click', async () => {
+            btn.disabled = true;
+            btn.innerHTML = 'Creating...';
+            const startDate = new Date(ex.deadline);
+            const endDate = new Date(startDate.getTime() + 60 * 60 * 1000);
+            const eventData = {
+              summary: `${ex.company || 'FillForm'} — ${ex.role || 'Reminder'}`,
+              description: `CTC: ${ex.ctc || 'N/A'}\nEligibility: ${ex.eligibility?.branches?.join(', ') || 'N/A'}\nLink: ${ex.registration_link || 'N/A'}`,
+              start_datetime: startDate.toISOString(),
+              end_datetime: endDate.toISOString(),
+            };
+            try {
+              const createRes = await fetch(`${API}/api/calendar/create-event`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ profile_id: profileId, event_data: eventData }),
+              });
+              if (createRes.ok) {
+                btn.className = 'btn-calendar added';
+                btn.innerHTML = 'Added to Calendar';
+                showToast('Event created in Google Calendar');
+              } else {
+                throw new Error('Failed');
+              }
+            } catch (e) {
+              btn.innerHTML = 'Add to Google Calendar';
+              btn.disabled = false;
+              showToast('Failed to create event', 'error');
             }
-          } else {
-            deadline.textContent = details.deadline;
-            renderSummary(details?.job_summary);
-          }
-        }
-      }
-
-      function renderError(message) {
-        if (!message) {
-          errorBox.style.display = 'none';
-          errorBox.textContent = '';
-          return;
-        }
-
-        errorBox.style.display = 'block';
-        errorBox.textContent = message;
-      }
-
-      function showPageWarning() {
-        if (window.location.protocol === 'file:') {
-          pageWarning.style.display = 'block';
-          pageWarning.textContent = 'Warning: This page is loaded from your file system. Open the app from http://127.0.0.1:5000 for API calls to work correctly.';
-        } else {
-          pageWarning.style.display = 'none';
-          pageWarning.textContent = '';
-        }
-      }
-
-      showPageWarning();
-
-      submitButton.addEventListener('click', async () => {
-        const formData = new FormData();
-        const text = document.getElementById('text').value;
-        const file = document.getElementById('file').files[0];
-
-        if (text) formData.append('text', text);
-        if (file) formData.append('file', file);
-
-        output.textContent = 'Processing...';
-        output.style.display = 'block';
-        renderError(null);
-
-        try {
-          const response = await fetch(`${API_BASE_URL}/api/analyze`, {
-            method: 'POST',
-            body: formData,
           });
-
-          if (!response.ok) {
-            const body = await response.text();
-            throw new Error(body || `Request failed with status ${response.status}`);
-          }
-
-          const data = await response.json();
-          renderStructuredDetails(data.extracted);
-          output.textContent = '';
-          output.style.display = 'none';
-        } catch (error) {
-          const message = error instanceof Error
-            ? `${error.message}. Make sure the backend is running with Python and Flask on port 5000.`
-            : 'Failed to fetch data. Make sure the backend is running on port 5000.';
-          output.style.display = 'block';
-          output.textContent = message;
-          renderError(message);
-          renderStructuredDetails(null);
+          container.appendChild(btn);
+        } else {
+          const connectBtn = document.createElement('button');
+          connectBtn.className = 'btn-connect-cal';
+          connectBtn.innerHTML = 'Connect Google Calendar';
+          connectBtn.addEventListener('click', async () => {
+            const authRes = await fetch(`${API}/api/calendar/auth?profile_id=${profileId}`);
+            const authData = await authRes.json();
+            if (authData.auth_url) window.open(authData.auth_url, '_blank');
+          });
+          container.appendChild(connectBtn);
         }
-      });
-    </script>
-  </body>
+      } catch (e) {
+        // Calendar status check failed silently
+      }
+    }
+
+    function renderSummary(details) {
+      const el = document.getElementById('r-summary');
+      el.innerHTML = '';
+      if (!details) { el.textContent = '—'; return; }
+
+      const wrapper = document.createElement('div');
+      const addSection = (title, content) => {
+        if (!content || (Array.isArray(content) && content.length === 0)) return;
+        const section = document.createElement('div');
+        section.className = 'summary-section';
+        const h = document.createElement('h4');
+        h.textContent = title;
+        section.appendChild(h);
+        if (Array.isArray(content)) {
+          const list = document.createElement('ul');
+          list.className = 'summary-list';
+          content.forEach(item => {
+            const li = document.createElement('li');
+            li.textContent = item;
+            list.appendChild(li);
+          });
+          section.appendChild(list);
+        } else {
+          const p = document.createElement('p');
+          p.textContent = content;
+          section.appendChild(p);
+        }
+        wrapper.appendChild(section);
+      };
+      addSection('Overview', details.overview);
+      addSection('Highlights', details.highlights);
+      addSection('Responsibilities', details.responsibilities);
+      addSection('Requirements', details.requirements);
+      addSection('Benefits', details.benefits);
+      el.appendChild(wrapper);
+    }
+
+    // ── Init ──
+    checkAuth();
+  </script>
+</body>
 </html>
