@@ -17,6 +17,17 @@ from backend.services.autofill import build_autofill_profile
 from backend.services.reminders import build_reminder_plan
 from backend.config import get_groq_api_key, get_groq_model
 from database.models import save_submission
+from backend.services.profile_service import (
+    create_or_update_profile,
+    get_profile,
+    get_default_profile,
+    delete_profile,
+    list_profiles,
+)
+from backend.services.eligibility_service import check_eligibility
+import secrets
+from flask import redirect
+from backend.services.calendar_service import get_auth_url, handle_callback, create_event, is_connected
 
 
 def _build_local_extracted(analysis: dict[str, object]) -> dict[str, object]:
@@ -95,3 +106,114 @@ def api_diag() -> tuple[object, int]:
     key_present = bool(get_groq_api_key())
     model = get_groq_model()
     return jsonify({"groq_key_present": key_present, "groq_model": model}), 200
+
+
+@api_bp.get("/api/profiles")
+def api_list_profiles() -> tuple[object, int]:
+    return jsonify(list_profiles()), 200
+
+
+@api_bp.get("/api/profiles/default")
+def api_get_default_profile() -> tuple[object, int]:
+    profile = get_default_profile()
+    if not profile:
+        return jsonify({"error": "No profile found"}), 404
+    return jsonify(profile), 200
+
+
+@api_bp.get("/api/profiles/<profile_id>")
+def api_get_profile(profile_id: str) -> tuple[object, int]:
+    profile = get_profile(profile_id)
+    if not profile:
+        return jsonify({"error": "Profile not found"}), 404
+    return jsonify(profile), 200
+
+
+@api_bp.post("/api/profiles")
+def api_create_profile() -> tuple[object, int]:
+    data = request.get_json()
+    if not data:
+        return jsonify({"error": "No data provided"}), 400
+    profile = create_or_update_profile(data)
+    return jsonify(profile), 201
+
+
+@api_bp.put("/api/profiles/<profile_id>")
+def api_update_profile(profile_id: str) -> tuple[object, int]:
+    data = request.get_json()
+    if not data:
+        return jsonify({"error": "No data provided"}), 400
+    profile = create_or_update_profile(data, profile_id)
+    if not profile:
+        return jsonify({"error": "Profile not found"}), 404
+    return jsonify(profile), 200
+
+
+@api_bp.delete("/api/profiles/<profile_id>")
+def api_delete_profile(profile_id: str) -> tuple[object, int]:
+    deleted = delete_profile(profile_id)
+    if not deleted:
+        return jsonify({"error": "Profile not found"}), 404
+    return jsonify({"success": True}), 200
+
+
+@api_bp.post("/api/check-eligibility")
+def api_check_eligibility() -> tuple[object, int]:
+    data = request.get_json()
+    if not data:
+        return jsonify({"error": "No data provided"}), 400
+
+    submission_id = data.get("submission_id")
+    profile_id = data.get("profile_id")
+
+    if not submission_id or not profile_id:
+        return jsonify({"error": "submission_id and profile_id required"}), 400
+
+    result = check_eligibility(int(submission_id), profile_id)
+    return jsonify(result), 200
+
+
+@api_bp.get("/api/calendar/auth")
+def api_calendar_auth() -> tuple[object, int]:
+    profile_id = request.args.get("profile_id")
+    if not profile_id:
+        return jsonify({"error": "profile_id required"}), 400
+    state = secrets.token_urlsafe(32)
+    auth_url = get_auth_url(state)
+    return jsonify({"auth_url": auth_url}), 200
+
+
+@api_bp.get("/api/calendar/callback")
+def api_calendar_callback() -> tuple[object, int]:
+    code = request.args.get("code")
+    state = request.args.get("state")
+    if not code:
+        return jsonify({"error": "Authorization code not provided"}), 400
+    handle_callback(code, state)
+    return redirect("http://127.0.0.1:5000")
+
+
+@api_bp.post("/api/calendar/create-event")
+def api_calendar_create_event() -> tuple[object, int]:
+    data = request.get_json()
+    if not data:
+        return jsonify({"error": "No data provided"}), 400
+
+    profile_id = data.get("profile_id")
+    event_data = data.get("event_data")
+
+    if not profile_id or not event_data:
+        return jsonify({"error": "profile_id and event_data required"}), 400
+
+    result = create_event(profile_id, event_data)
+    if not result:
+        return jsonify({"error": "Calendar not connected"}), 400
+    return jsonify(result), 201
+
+
+@api_bp.get("/api/calendar/status")
+def api_calendar_status() -> tuple[object, int]:
+    profile_id = request.args.get("profile_id")
+    if not profile_id:
+        return jsonify({"error": "profile_id required"}), 400
+    return jsonify({"connected": is_connected(profile_id)}), 200
