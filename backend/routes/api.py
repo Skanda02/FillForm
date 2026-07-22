@@ -5,7 +5,7 @@ from __future__ import annotations
 import sys
 from pathlib import Path
 
-from flask import Blueprint, jsonify, request
+from flask import Blueprint, jsonify, redirect, request, session
 
 ROOT_DIR = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT_DIR.parent))
@@ -28,6 +28,13 @@ from backend.services.eligibility_service import check_eligibility
 import secrets
 from flask import redirect
 from backend.services.calendar_service import get_auth_url, handle_callback, create_event, is_connected
+from backend.services.auth_service import (
+    get_login_url,
+    handle_login_callback,
+    get_current_user,
+    create_profile_for_user,
+    logout_user,
+)
 
 
 def _build_local_extracted(analysis: dict[str, object]) -> dict[str, object]:
@@ -217,3 +224,62 @@ def api_calendar_status() -> tuple[object, int]:
     if not profile_id:
         return jsonify({"error": "profile_id required"}), 400
     return jsonify({"connected": is_connected(profile_id)}), 200
+
+
+@api_bp.get("/api/auth/login")
+def api_auth_login() -> tuple[object, int]:
+    state = secrets.token_urlsafe(32)
+    session["oauth_state"] = state
+    auth_url = get_login_url(state)
+    return jsonify({"auth_url": auth_url}), 200
+
+
+@api_bp.get("/api/auth/callback")
+def api_auth_callback() -> tuple[object, int]:
+    code = request.args.get("code")
+    if not code:
+        return jsonify({"error": "Authorization code not provided"}), 400
+
+    user = handle_login_callback(code)
+    if not user:
+        return jsonify({"error": "Failed to authenticate with Google"}), 401
+
+    session["user_id"] = user["id"]
+    return redirect("http://127.0.0.1:5000")
+
+
+@api_bp.get("/api/auth/me")
+def api_auth_me() -> tuple[object, int]:
+    user_id = session.get("user_id")
+    if not user_id:
+        return jsonify({"error": "Not authenticated"}), 401
+
+    user = get_current_user(user_id)
+    if not user:
+        session.clear()
+        return jsonify({"error": "User not found"}), 401
+
+    return jsonify(user), 200
+
+
+@api_bp.post("/api/auth/logout")
+def api_auth_logout() -> tuple[object, int]:
+    logout_user(session)
+    return jsonify({"success": True}), 200
+
+
+@api_bp.post("/api/auth/profile")
+def api_auth_create_profile() -> tuple[object, int]:
+    user_id = session.get("user_id")
+    if not user_id:
+        return jsonify({"error": "Not authenticated"}), 401
+
+    data = request.get_json()
+    if not data:
+        return jsonify({"error": "No data provided"}), 400
+
+    profile = create_profile_for_user(user_id, data)
+    if not profile:
+        return jsonify({"error": "Failed to create profile"}), 500
+
+    return jsonify(profile), 201
