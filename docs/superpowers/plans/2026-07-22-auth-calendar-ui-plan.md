@@ -74,7 +74,7 @@ def get_google_login_client_secret() -> str | None:
 
 - [ ] **Step 3: Verify config loads**
 
-Run: `cd /Users/skandaprasadk/Documents/projects/FillForm && python -c "from backend.config import get_secret_key, get_google_login_client_id; print('SECRET_KEY:', bool(get_secret_key())); print('LOGIN_CLIENT_ID:', get_google_login_client_id())"`
+Run: ` python -c "from backend.config import get_secret_key, get_google_login_client_id; print('SECRET_KEY:', bool(get_secret_key())); print('LOGIN_CLIENT_ID:', get_google_login_client_id())"`
 
 Expected: `SECRET_KEY: True` and `LOGIN_CLIENT_ID: None` (not set yet)
 
@@ -1117,7 +1117,7 @@ Replace the full contents of `frontend/index.html` with the following. This incl
 
 - [ ] **Step 2: Verify the page loads**
 
-Run: `cd /Users/skandaprasadk/Documents/projects/FillForm && python -c "from backend.app import create_app; app = create_app(); print('Routes:'); [print(f'  {rule}') for rule in app.url_map.iter_rules() if 'auth' in str(rule)]"`
+Run: ` python -c "from backend.app import create_app; app = create_app(); print('Routes:'); [print(f'  {rule}') for rule in app.url_map.iter_rules() if 'auth' in str(rule)]"`
 
 Expected: Shows `/api/auth/login`, `/api/auth/callback`, `/api/auth/me`, `/api/auth/logout`, `/api/auth/profile` routes.
 
@@ -1136,7 +1136,7 @@ git commit -m "feat: add login screen, profile form, calendar button, and UI ove
 
 - [ ] **Step 1: Start the server**
 
-Run: `cd /Users/skandaprasadk/Documents/projects/FillForm && python -m backend.app`
+Run: `python -m backend.app`
 
 Expected: Server starts on `http://127.0.0.1:5000` without errors.
 
