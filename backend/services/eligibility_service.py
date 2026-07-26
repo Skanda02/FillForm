@@ -42,7 +42,7 @@ def check_eligibility(submission_id: int, profile_id: str) -> dict:
             eligible = False
             reasons.append(f"Branch mismatch: requires {', '.join(required_branches)}, you are {user_branch}")
 
-    degree_match = re.search(r"(?:degree|qualification)\s*[:=]?\s*(\w[\w\s]*)", text, re.IGNORECASE)
+    degree_match = re.search(r"(?:degree|qualification)\s*[:=]?\s*([^\n]+)", text, re.IGNORECASE)
     if degree_match:
         required_degree = degree_match.group(1).strip().upper()
         user_degree = (profile.get("degree") or "").upper()
