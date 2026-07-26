@@ -230,7 +230,10 @@ def api_calendar_status() -> tuple[object, int]:
 def api_auth_login() -> tuple[object, int]:
     state = secrets.token_urlsafe(32)
     session["oauth_state"] = state
-    auth_url = get_login_url(state)
+    redirect_uri = f"{request.host_url.rstrip('/')}/api/auth/callback"
+    session["login_redirect_uri"] = redirect_uri
+    auth_url, code_verifier = get_login_url(state, redirect_uri=redirect_uri)
+    session["code_verifier"] = code_verifier
     return jsonify({"auth_url": auth_url}), 200
 
 
@@ -240,12 +243,21 @@ def api_auth_callback() -> tuple[object, int]:
     if not code:
         return jsonify({"error": "Authorization code not provided"}), 400
 
-    user = handle_login_callback(code)
+    code_verifier = session.get("code_verifier")
+    redirect_uri = session.get("login_redirect_uri")
+    print(f"[DEBUG] Session keys: {list(session.keys())}", flush=True)
+    print(f"[DEBUG] code_verifier in session: {code_verifier is not None}", flush=True)
+    print(f"[DEBUG] redirect_uri: {redirect_uri}", flush=True)
+
+    if not code_verifier:
+        return jsonify({"error": "Session expired or code_verifier missing. Please try logging in again."}), 400
+
+    user = handle_login_callback(code, code_verifier, redirect_uri=redirect_uri)
     if not user:
         return jsonify({"error": "Failed to authenticate with Google"}), 401
 
     session["user_id"] = user["id"]
-    return redirect("http://127.0.0.1:5000")
+    return redirect(f"{request.host_url.rstrip('/')}")
 
 
 @api_bp.get("/api/auth/me")

@@ -11,40 +11,32 @@ from backend.config import get_google_login_client_id, get_google_login_client_s
 from backend.database import get_collection
 
 LOGIN_SCOPES = ["openid", "https://www.googleapis.com/auth/userinfo.email", "https://www.googleapis.com/auth/userinfo.profile"]
-LOGIN_REDIRECT_URI = "http://127.0.0.1:5000/api/auth/callback"
+LOGIN_REDIRECT_URI = "https://s3hmjr5k-5000.inc1.devtunnels.ms/api/auth/callback"
 
 
-def _get_client_config() -> dict:
-    return {
-        "web": {
-            "client_id": get_google_login_client_id() or "",
-            "client_secret": get_google_login_client_secret() or "",
-            "auth_uri": "https://accounts.google.com/o/oauth2/auth",
-            "token_uri": "https://oauth2.googleapis.com/token",
-            "redirect_uris": [LOGIN_REDIRECT_URI],
-        }
-    }
-
-
-def get_login_url(state: str) -> str:
-    flow = Flow.from_client_config(
-        _get_client_config(),
+def get_login_url(state: str, redirect_uri: str | None = None) -> str:
+    uri = redirect_uri or LOGIN_REDIRECT_URI
+    flow = Flow.from_client_secrets_file(
+        "client_secret.json",
         scopes=LOGIN_SCOPES,
-        redirect_uri=LOGIN_REDIRECT_URI,
+        redirect_uri=uri,
+        autogenerate_code_verifier=True,
     )
     auth_url, _ = flow.authorization_url(
         access_type="offline",
         prompt="consent",
         state=state,
     )
-    return auth_url
+    return auth_url, flow.code_verifier
 
 
-def handle_login_callback(code: str) -> dict | None:
-    flow = Flow.from_client_config(
-        _get_client_config(),
+def handle_login_callback(code: str, code_verifier: str, redirect_uri: str | None = None) -> dict | None:
+    uri = redirect_uri or LOGIN_REDIRECT_URI
+    flow = Flow.from_client_secrets_file(
+        "client_secret.json",
         scopes=LOGIN_SCOPES,
-        redirect_uri=LOGIN_REDIRECT_URI,
+        redirect_uri=uri,
+        code_verifier=code_verifier,
     )
     flow.fetch_token(code=code)
     credentials = flow.credentials
