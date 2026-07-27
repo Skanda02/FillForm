@@ -65,3 +65,11 @@ def get_google_login_client_id() -> str | None:
 
 def get_google_login_client_secret() -> str | None:
     return os.environ.get("GOOGLE_LOGIN_CLIENT_SECRET")
+
+
+def get_google_calendar_redirect_uri() -> str:
+    return os.environ.get("GOOGLE_CALENDAR_REDIRECT_URI", "http://localhost:5000/api/calendar/callback")
+
+
+def get_google_auth_redirect_uri() -> str | None:
+    return os.environ.get("GOOGLE_AUTH_REDIRECT_URI")

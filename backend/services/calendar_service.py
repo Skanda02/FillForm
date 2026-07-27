@@ -7,10 +7,14 @@ from google.oauth2.credentials import Credentials
 from google_auth_oauthlib.flow import Flow
 from googleapiclient.discovery import build
 
+from backend.config import get_google_calendar_redirect_uri
 from backend.database import get_collection
 
 SCOPES = ["https://www.googleapis.com/auth/calendar"]
-REDIRECT_URI = "http://127.0.0.1:5000/api/calendar/callback"
+
+
+def _get_redirect_uri() -> str:
+    return get_google_calendar_redirect_uri()
 
 
 def _get_client_config() -> dict:
@@ -20,7 +24,7 @@ def _get_client_config() -> dict:
             "client_secret": os.environ.get("GOOGLE_CLIENT_SECRET", ""),
             "auth_uri": "https://accounts.google.com/o/oauth2/auth",
             "token_uri": "https://oauth2.googleapis.com/token",
-            "redirect_uris": [REDIRECT_URI],
+            "redirect_uris": [_get_redirect_uri()],
         }
     }
 
@@ -29,7 +33,7 @@ def get_auth_url(state: str) -> str:
     flow = Flow.from_client_config(
         _get_client_config(),
         scopes=SCOPES,
-        redirect_uri=REDIRECT_URI,
+        redirect_uri=_get_redirect_uri(),
     )
     auth_url, _ = flow.authorization_url(
         access_type="offline",
@@ -43,7 +47,7 @@ def handle_callback(code: str, profile_id: str) -> bool:
     flow = Flow.from_client_config(
         _get_client_config(),
         scopes=SCOPES,
-        redirect_uri=REDIRECT_URI,
+        redirect_uri=_get_redirect_uri(),
     )
     flow.fetch_token(code=code)
     credentials = flow.credentials
