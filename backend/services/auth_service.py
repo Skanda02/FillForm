@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import logging
 from datetime import UTC, datetime
 from pathlib import Path
 
@@ -10,6 +11,8 @@ from google_auth_oauthlib.flow import Flow
 
 from backend.config import get_google_auth_redirect_uri
 from backend.database import get_collection
+
+log = logging.getLogger(__name__)
 
 LOGIN_SCOPES = [
     "openid",
@@ -20,7 +23,7 @@ LOGIN_SCOPES = [
 CLIENT_SECRETS_PATH = str(Path(__file__).resolve().parent.parent / "client_secret.json")
 
 
-def get_login_url(state: str, redirect_uri: str | None = None) -> str:
+def get_login_url(state: str, redirect_uri: str | None = None) -> tuple[str, str]:
     uri = redirect_uri or get_google_auth_redirect_uri()
     flow = Flow.from_client_secrets_file(
         CLIENT_SECRETS_PATH,
@@ -44,7 +47,11 @@ def handle_login_callback(code: str, code_verifier: str, redirect_uri: str | Non
         redirect_uri=uri,
         code_verifier=code_verifier,
     )
-    flow.fetch_token(code=code)
+    try:
+        flow.fetch_token(code=code)
+    except Exception:
+        log.exception("Login token exchange failed")
+        return None
     credentials = flow.credentials
 
     resp = http_requests.get(
