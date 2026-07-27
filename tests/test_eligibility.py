@@ -37,9 +37,9 @@ def test_eligible_all_criteria_met():
         {
             "branch": "CSE",
             "degree": "B.E.",
-            "graduation_year": 2024,
-            "overall_cgpa": 8.5,
-            "active_backlogs": 0,
+            "batch": 2024,
+            "percentage": 8.5,
+            "backlog_rule": 0,
         }
     )
 
@@ -77,7 +77,7 @@ def test_cgpa_below_minimum():
 
     text = "CGPA >= 9.0"
     submission_id = _make_submission(text)
-    profile_id = _make_profile({"overall_cgpa": 7.5})
+    profile_id = _make_profile({"percentage": 7.5})
 
     result = check_eligibility(submission_id, profile_id)
     assert result["eligible"] is False
@@ -89,7 +89,7 @@ def test_active_backlogs():
 
     text = "No backlog"
     submission_id = _make_submission(text)
-    profile_id = _make_profile({"active_backlogs": 2})
+    profile_id = _make_profile({"backlog_rule": 2})
 
     result = check_eligibility(submission_id, profile_id)
     assert result["eligible"] is False

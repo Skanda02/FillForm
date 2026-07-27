@@ -30,7 +30,7 @@ def check_eligibility(submission_id: int, profile_id: str) -> dict:
     batch_match = re.search(r"(?:batch|year)\s*[:=]?\s*(\d{4})", text, re.IGNORECASE)
     if batch_match:
         required_batch = batch_match.group(1)
-        grad_year = str(profile.get("graduation_year", ""))
+        grad_year = str(profile.get("batch", ""))
         if grad_year and required_batch not in grad_year:
             eligible = False
             reasons.append(f"Batch mismatch: requires {required_batch}, you are {grad_year}")
@@ -54,9 +54,11 @@ def check_eligibility(submission_id: int, profile_id: str) -> dict:
     pct_match = re.search(r"(?:percentage|cgpa|gpa)\s*[>=]+\s*(\d+(?:\.\d+)?)", text, re.IGNORECASE)
     if pct_match:
         required_pct = float(pct_match.group(1))
-        user_cgpa = profile.get("overall_cgpa")
+        if required_pct <= 10:
+            required_pct *= 10
+        user_cgpa = profile.get("percentage")
         if user_cgpa is not None:
-            user_pct = float(user_cgpa) if float(user_cgpa) <= 10 else float(user_cgpa)
+            user_pct = float(user_cgpa) * 10 if float(user_cgpa) <= 10 else float(user_cgpa)
             if user_pct < required_pct:
                 eligible = False
                 reasons.append(f"CGPA below minimum: {user_pct} < {required_pct}")
@@ -65,7 +67,7 @@ def check_eligibility(submission_id: int, profile_id: str) -> dict:
     if backlog_match:
         rule = backlog_match.group(0).lower()
         if "no backlog" in rule:
-            active_backlogs = profile.get("active_backlogs", 0)
+            active_backlogs = profile.get("backlog_rule", 0)
             if active_backlogs and int(active_backlogs) > 0:
                 eligible = False
                 reasons.append(f"Active backlogs: {active_backlogs}")
