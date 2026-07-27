@@ -2,15 +2,18 @@
 
 from __future__ import annotations
 
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 
 import requests as http_requests
 from google_auth_oauthlib.flow import Flow
 
-from backend.config import get_google_login_client_id, get_google_login_client_secret
 from backend.database import get_collection
 
-LOGIN_SCOPES = ["openid", "https://www.googleapis.com/auth/userinfo.email", "https://www.googleapis.com/auth/userinfo.profile"]
+LOGIN_SCOPES = [
+    "openid",
+    "https://www.googleapis.com/auth/userinfo.email",
+    "https://www.googleapis.com/auth/userinfo.profile",
+]
 LOGIN_REDIRECT_URI = "https://s3hmjr5k-5000.inc1.devtunnels.ms/api/auth/callback"
 
 
@@ -50,7 +53,7 @@ def handle_login_callback(code: str, code_verifier: str, redirect_uri: str | Non
     google_user = resp.json()
 
     col = get_collection("users")
-    now = datetime.now(timezone.utc).isoformat()
+    now = datetime.now(UTC).isoformat()
     existing = col.find_one({"google_id": google_user["id"]})
 
     if existing:
@@ -83,6 +86,7 @@ def _serialize(doc: dict) -> dict:
 
 def get_current_user(user_id: str) -> dict | None:
     from bson import ObjectId
+
     col = get_collection("users")
     doc = col.find_one({"_id": ObjectId(user_id)})
     if not doc:
@@ -91,6 +95,7 @@ def get_current_user(user_id: str) -> dict | None:
 
     if user.get("profile_id"):
         from backend.services.profile_service import get_profile
+
         user["profile"] = get_profile(user["profile_id"])
     else:
         user["profile"] = None
@@ -104,6 +109,7 @@ def get_user_id_from_session(session: dict) -> str | None:
 
 def create_profile_for_user(user_id: str, profile_data: dict) -> dict | None:
     from bson import ObjectId
+
     from backend.services.profile_service import create_or_update_profile
 
     profile = create_or_update_profile(profile_data)
@@ -113,7 +119,7 @@ def create_profile_for_user(user_id: str, profile_data: dict) -> dict | None:
     col = get_collection("users")
     col.update_one(
         {"_id": ObjectId(user_id)},
-        {"$set": {"profile_id": profile["id"], "updated_at": datetime.now(timezone.utc).isoformat()}},
+        {"$set": {"profile_id": profile["id"], "updated_at": datetime.now(UTC).isoformat()}},
     )
     return profile
 

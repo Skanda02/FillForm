@@ -19,28 +19,28 @@ FRONTEND_DIR = PROJECT_ROOT / "frontend"
 
 
 def create_app() -> Flask:
-	app = Flask(
-		__name__,
-		static_folder=str(FRONTEND_DIR),
-		static_url_path="",
-	)
-	app.secret_key = get_secret_key()
-	app.config["SESSION_COOKIE_SAMESITE"] = "Lax"
-	app.config["SESSION_COOKIE_HTTPONLY"] = True
+    app = Flask(
+        __name__,
+        static_folder=str(FRONTEND_DIR),
+        static_url_path="",
+    )
+    app.secret_key = get_secret_key()
+    app.config["SESSION_COOKIE_SAMESITE"] = "Lax"
+    app.config["SESSION_COOKIE_HTTPONLY"] = True
 
-	CORS(app, resources={r"/api/*": {"origins": "*"}})
-	app.register_blueprint(api_bp)
-	initialize_database()
+    CORS(app, resources={r"/api/*": {"origins": "*"}})
+    app.register_blueprint(api_bp)
+    initialize_database()
 
-	@app.get("/")
-	def home() -> object:
-		return app.send_static_file("index.html")
+    @app.get("/")
+    def home() -> object:
+        return app.send_static_file("index.html")
 
-	return app
+    return app
 
 
 app = create_app()
 
 
 if __name__ == "__main__":
-	app.run(debug=True)
+    app.run(debug=True)

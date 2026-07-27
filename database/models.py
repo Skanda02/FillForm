@@ -5,12 +5,11 @@ from __future__ import annotations
 import json
 import os
 import sqlite3
+from collections.abc import Iterable
 from datetime import datetime
-from typing import Any, Iterable
+from typing import Any
 
-DATABASE_FILENAME = os.path.normpath(
-    os.path.join(os.path.dirname(__file__), "..", "fillform.db")
-)
+DATABASE_FILENAME = os.path.normpath(os.path.join(os.path.dirname(__file__), "..", "fillform.db"))
 
 
 def get_database_path(db_path: str | None = None) -> str:

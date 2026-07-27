@@ -1,8 +1,9 @@
 from __future__ import annotations
 
 import re
-from database.models import get_submission
+
 from backend.services.profile_service import get_profile
+from database.models import get_submission
 
 
 def _parse_percentage(value: str | None) -> float | None:

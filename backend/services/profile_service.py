@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 
 from bson import ObjectId
 
@@ -16,7 +16,7 @@ def _serialize(doc: dict | None) -> dict | None:
 
 def create_or_update_profile(data: dict, profile_id: str | None = None) -> dict:
     col = get_collection("profiles")
-    now = datetime.now(timezone.utc).isoformat()
+    now = datetime.now(UTC).isoformat()
     data["updated_at"] = now
 
     if profile_id:

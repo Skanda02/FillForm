@@ -4,4 +4,9 @@ __pycache__/
 venv/
 node_modules/
 .venv/
+docs/
 docs/superpowers/
+.pytest_cache/
+.ruff_cache/
+*.db
+*.sqlite

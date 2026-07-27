@@ -33,13 +33,15 @@ def test_eligible_all_criteria_met():
 
     text = "Branches: CSE\nDegree: B.E.\nCGPA >= 7.0\nNo backlog"
     submission_id = _make_submission(text)
-    profile_id = _make_profile({
-        "branch": "CSE",
-        "degree": "B.E.",
-        "graduation_year": 2024,
-        "overall_cgpa": 8.5,
-        "active_backlogs": 0,
-    })
+    profile_id = _make_profile(
+        {
+            "branch": "CSE",
+            "degree": "B.E.",
+            "graduation_year": 2024,
+            "overall_cgpa": 8.5,
+            "active_backlogs": 0,
+        }
+    )
 
     result = check_eligibility(submission_id, profile_id)
     assert result["eligible"] is True
