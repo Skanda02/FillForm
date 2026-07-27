@@ -81,10 +81,20 @@ def api_analyze() -> tuple[object, int]:
         parsed = parse_submission_input(request)
         if get_groq_api_key():
             extracted = analyze_with_groq(parsed)
+            deadline = extracted.get("deadline")
+            submission_id = save_submission(
+                source_type=parsed["source_type"],
+                filename=parsed["filename"],
+                text=parsed["text"],
+                summary=extracted.get("job_summary", {}).get("overview"),
+                deadline_candidates=[deadline] if deadline else [],
+                has_deadline_signal=bool(deadline),
+                reminder_plan=build_reminder_plan([deadline] if deadline else []),
+            )
         else:
             analysis = analyze_text(parsed["text"])
             extracted = _build_local_extracted(analysis)
-            save_submission(
+            submission_id = save_submission(
                 source_type=parsed["source_type"],
                 filename=parsed["filename"],
                 text=parsed["text"],
@@ -96,7 +106,7 @@ def api_analyze() -> tuple[object, int]:
                 has_deadline_signal=analysis.get("has_deadline_signal", False),
                 reminder_plan=build_reminder_plan(analysis.get("deadline_candidates", [])),
             )
-        return jsonify({"extracted": extracted}), 200
+        return jsonify({"extracted": extracted, "submission_id": submission_id}), 200
     except GroqExtractionError as error:
         return jsonify({"error": str(error)}), 502
     except ValueError as error:
