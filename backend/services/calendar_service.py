@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import logging
 import os
 from datetime import UTC, datetime
 
@@ -9,6 +10,8 @@ from googleapiclient.discovery import build
 
 from backend.config import get_google_calendar_redirect_uri
 from backend.database import get_collection
+
+log = logging.getLogger(__name__)
 
 SCOPES = ["https://www.googleapis.com/auth/calendar"]
 
@@ -49,7 +52,11 @@ def handle_callback(code: str, profile_id: str) -> bool:
         scopes=SCOPES,
         redirect_uri=_get_redirect_uri(),
     )
-    flow.fetch_token(code=code)
+    try:
+        flow.fetch_token(code=code)
+    except Exception:
+        log.exception("Calendar token exchange failed for profile %s", profile_id)
+        return False
     credentials = flow.credentials
 
     col = get_collection("calendar_tokens")
