@@ -185,7 +185,12 @@ def api_check_eligibility() -> tuple[object, int]:
     if not submission_id or not profile_id:
         return jsonify({"error": "submission_id and profile_id required"}), 400
 
-    result = check_eligibility(int(submission_id), profile_id)
+    try:
+        sub_id = int(submission_id)
+    except (TypeError, ValueError):
+        return jsonify({"error": "submission_id must be a valid integer"}), 400
+
+    result = check_eligibility(sub_id, profile_id)
     return jsonify(result), 200
 
 

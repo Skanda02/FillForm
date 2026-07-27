@@ -1,10 +1,26 @@
 from __future__ import annotations
 
+import logging
 from datetime import UTC, datetime
 
 from bson import ObjectId
 
 from backend.database import get_collection
+
+log = logging.getLogger(__name__)
+
+ALLOWED_PROFILE_FIELDS = frozenset(
+    {
+        "name",
+        "email",
+        "phone",
+        "degree",
+        "branch",
+        "batch",
+        "percentage",
+        "backlog_rule",
+    }
+)
 
 
 def _serialize(doc: dict | None) -> dict | None:
@@ -17,14 +33,15 @@ def _serialize(doc: dict | None) -> dict | None:
 def create_or_update_profile(data: dict, profile_id: str | None = None) -> dict:
     col = get_collection("profiles")
     now = datetime.now(UTC).isoformat()
-    data["updated_at"] = now
+    safe_data = {k: v for k, v in data.items() if k in ALLOWED_PROFILE_FIELDS}
+    safe_data["updated_at"] = now
 
     if profile_id:
-        col.update_one({"_id": ObjectId(profile_id)}, {"$set": data}, upsert=True)
+        col.update_one({"_id": ObjectId(profile_id)}, {"$set": safe_data}, upsert=True)
         return get_profile(profile_id)
 
-    data["created_at"] = now
-    result = col.insert_one(data)
+    safe_data["created_at"] = now
+    result = col.insert_one(safe_data)
     return get_profile(str(result.inserted_id))
 
 
