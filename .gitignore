@@ -1,6 +1,5 @@
 __pycache__/
 *.pyc
-.env
 venv/
 node_modules/
 .venv/
@@ -10,3 +9,16 @@ docs/superpowers/
 .ruff_cache/
 *.db
 *.sqlite
+
+# Secrets and credentials — never commit these
+.env
+.env.*
+!.env.example
+backend/.env
+backend/.env.*
+!backend/.env.example
+client_secret.json
+backend/client_secret.json
+*.key
+*.pem
+service-account*.json
