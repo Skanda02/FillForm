@@ -2,8 +2,11 @@
 
 from __future__ import annotations
 
+import logging
 import os
 from pathlib import Path
+
+log = logging.getLogger(__name__)
 
 
 def load_env_file(env_path: Path | None = None) -> None:
@@ -56,7 +59,20 @@ def get_google_client_secret() -> str | None:
 
 
 def get_secret_key() -> str:
-    return os.environ.get("SECRET_KEY", "fillform-dev-secret-change-in-production")
+    key = os.environ.get("SECRET_KEY")
+    if not key:
+        log.warning("SECRET_KEY not set — using insecure dev default. Set SECRET_KEY env var for production.")
+        key = "fillform-dev-secret-change-in-production"
+    return key
+
+
+def get_cors_origins() -> list[str]:
+    raw = os.environ.get("CORS_ORIGINS", "*")
+    return [o.strip() for o in raw.split(",") if o.strip()]
+
+
+def get_debug_mode() -> bool:
+    return os.environ.get("FLASK_DEBUG", "false").lower() in ("1", "true", "yes")
 
 
 def get_google_login_client_id() -> str | None:

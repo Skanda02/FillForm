@@ -11,7 +11,7 @@ sys.path.insert(0, str(PROJECT_ROOT))
 from flask import Flask
 from flask_cors import CORS
 
-from backend.config import get_secret_key
+from backend.config import get_cors_origins, get_debug_mode, get_secret_key
 from backend.routes.api import api_bp
 from database.models import initialize_database
 
@@ -28,7 +28,7 @@ def create_app() -> Flask:
     app.config["SESSION_COOKIE_SAMESITE"] = "Lax"
     app.config["SESSION_COOKIE_HTTPONLY"] = True
 
-    CORS(app, resources={r"/api/*": {"origins": "*"}})
+    CORS(app, resources={r"/api/*": {"origins": get_cors_origins()}})
     app.register_blueprint(api_bp)
     initialize_database()
 
@@ -43,4 +43,4 @@ app = create_app()
 
 
 if __name__ == "__main__":
-    app.run(debug=True)
+    app.run(debug=get_debug_mode())
