@@ -3,10 +3,12 @@
 from __future__ import annotations
 
 from datetime import UTC, datetime
+from pathlib import Path
 
 import requests as http_requests
 from google_auth_oauthlib.flow import Flow
 
+from backend.config import get_google_auth_redirect_uri
 from backend.database import get_collection
 
 LOGIN_SCOPES = [
@@ -14,13 +16,14 @@ LOGIN_SCOPES = [
     "https://www.googleapis.com/auth/userinfo.email",
     "https://www.googleapis.com/auth/userinfo.profile",
 ]
-LOGIN_REDIRECT_URI = "https://s3hmjr5k-5000.inc1.devtunnels.ms/api/auth/callback"
+
+CLIENT_SECRETS_PATH = str(Path(__file__).resolve().parent.parent / "client_secret.json")
 
 
 def get_login_url(state: str, redirect_uri: str | None = None) -> str:
-    uri = redirect_uri or LOGIN_REDIRECT_URI
+    uri = redirect_uri or get_google_auth_redirect_uri()
     flow = Flow.from_client_secrets_file(
-        "client_secret.json",
+        CLIENT_SECRETS_PATH,
         scopes=LOGIN_SCOPES,
         redirect_uri=uri,
         autogenerate_code_verifier=True,
@@ -34,9 +37,9 @@ def get_login_url(state: str, redirect_uri: str | None = None) -> str:
 
 
 def handle_login_callback(code: str, code_verifier: str, redirect_uri: str | None = None) -> dict | None:
-    uri = redirect_uri or LOGIN_REDIRECT_URI
+    uri = redirect_uri or get_google_auth_redirect_uri()
     flow = Flow.from_client_secrets_file(
-        "client_secret.json",
+        CLIENT_SECRETS_PATH,
         scopes=LOGIN_SCOPES,
         redirect_uri=uri,
         code_verifier=code_verifier,
