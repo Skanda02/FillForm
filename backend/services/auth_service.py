@@ -20,7 +20,7 @@ LOGIN_SCOPES = [
 CLIENT_SECRETS_PATH = str(Path(__file__).resolve().parent.parent / "client_secret.json")
 
 
-def get_login_url(state: str, redirect_uri: str | None = None) -> str:
+def get_login_url(state: str, redirect_uri: str | None = None) -> tuple[str, str]:
     uri = redirect_uri or get_google_auth_redirect_uri()
     flow = Flow.from_client_secrets_file(
         CLIENT_SECRETS_PATH,

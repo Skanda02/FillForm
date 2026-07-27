@@ -6,7 +6,7 @@ import json
 import os
 import sqlite3
 from collections.abc import Iterable
-from datetime import datetime
+from datetime import UTC, datetime
 from typing import Any
 
 DATABASE_FILENAME = os.path.normpath(os.path.join(os.path.dirname(__file__), "..", "fillform.db"))
@@ -23,7 +23,7 @@ def get_connection(db_path: str | None = None) -> sqlite3.Connection:
 
 
 def _now_iso() -> str:
-    return datetime.utcnow().replace(microsecond=0).isoformat() + "Z"
+    return datetime.now(UTC).replace(microsecond=0).isoformat().replace("+00:00", "Z")
 
 
 def _json_dumps(value: Any) -> str:
