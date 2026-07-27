@@ -10,31 +10,30 @@ from flask import Blueprint, jsonify, redirect, request, session
 ROOT_DIR = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT_DIR.parent))
 
-from backend.services.groq_service import GroqExtractionError, analyze_with_groq
-from backend.services.parser import parse_submission_input
-from backend.services.analyzer import analyze_text
-from backend.services.autofill import build_autofill_profile
-from backend.services.reminders import build_reminder_plan
-from backend.config import get_groq_api_key, get_groq_model
-from database.models import save_submission
-from backend.services.profile_service import (
-    create_or_update_profile,
-    get_profile,
-    get_default_profile,
-    delete_profile,
-    list_profiles,
-)
-from backend.services.eligibility_service import check_eligibility
 import secrets
-from flask import redirect
-from backend.services.calendar_service import get_auth_url, handle_callback, create_event, is_connected
+
+from backend.config import get_groq_api_key, get_groq_model
+from backend.services.analyzer import analyze_text
 from backend.services.auth_service import (
+    create_profile_for_user,
+    get_current_user,
     get_login_url,
     handle_login_callback,
-    get_current_user,
-    create_profile_for_user,
     logout_user,
 )
+from backend.services.calendar_service import create_event, get_auth_url, handle_callback, is_connected
+from backend.services.eligibility_service import check_eligibility
+from backend.services.groq_service import GroqExtractionError, analyze_with_groq
+from backend.services.parser import parse_submission_input
+from backend.services.profile_service import (
+    create_or_update_profile,
+    delete_profile,
+    get_default_profile,
+    get_profile,
+    list_profiles,
+)
+from backend.services.reminders import build_reminder_plan
+from database.models import save_submission
 
 
 def _build_local_extracted(analysis: dict[str, object]) -> dict[str, object]:

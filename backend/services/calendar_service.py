@@ -1,12 +1,13 @@
 from __future__ import annotations
 
 import os
-from datetime import datetime, timezone
+from datetime import UTC, datetime
+
 from google.oauth2.credentials import Credentials
 from google_auth_oauthlib.flow import Flow
 from googleapiclient.discovery import build
-from backend.database import get_collection
 
+from backend.database import get_collection
 
 SCOPES = ["https://www.googleapis.com/auth/calendar"]
 REDIRECT_URI = "http://127.0.0.1:5000/api/calendar/callback"
@@ -55,11 +56,11 @@ def handle_callback(code: str, profile_id: str) -> bool:
                 "access_token": credentials.token,
                 "refresh_token": credentials.refresh_token,
                 "token_expiry": credentials.expiry.isoformat() if credentials.expiry else None,
-                "updated_at": datetime.now(timezone.utc).isoformat(),
+                "updated_at": datetime.now(UTC).isoformat(),
             },
             "$setOnInsert": {
                 "profile_id": profile_id,
-                "created_at": datetime.now(timezone.utc).isoformat(),
+                "created_at": datetime.now(UTC).isoformat(),
             },
         },
         upsert=True,
