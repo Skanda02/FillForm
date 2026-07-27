@@ -185,6 +185,8 @@ def api_calendar_auth() -> tuple[object, int]:
     if not profile_id:
         return jsonify({"error": "profile_id required"}), 400
     state = secrets.token_urlsafe(32)
+    session["calendar_oauth_state"] = state
+    session["calendar_profile_id"] = profile_id
     auth_url = get_auth_url(state)
     return jsonify({"auth_url": auth_url}), 200
 
@@ -195,8 +197,14 @@ def api_calendar_callback() -> tuple[object, int]:
     state = request.args.get("state")
     if not code:
         return jsonify({"error": "Authorization code not provided"}), 400
-    handle_callback(code, state)
-    return redirect("http://127.0.0.1:5000")
+    expected_state = session.pop("calendar_oauth_state", None)
+    profile_id = session.pop("calendar_profile_id", None)
+    if not state or state != expected_state:
+        return jsonify({"error": "Invalid OAuth state"}), 400
+    if not profile_id:
+        return jsonify({"error": "profile_id not found in session"}), 400
+    handle_callback(code, profile_id)
+    return redirect(request.host_url)
 
 
 @api_bp.post("/api/calendar/create-event")
