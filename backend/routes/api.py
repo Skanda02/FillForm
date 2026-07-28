@@ -14,6 +14,7 @@ import secrets
 
 from backend.config import get_groq_api_key, get_groq_model
 from backend.services.analyzer import analyze_text
+from backend.services.autofill_service import close_browser, get_form_state, start_autofill
 from backend.services.auth_service import (
     create_profile_for_user,
     get_current_user,
@@ -152,6 +153,34 @@ def api_create_profile() -> tuple[object, int]:
         return jsonify({"error": "No data provided"}), 400
     profile = create_or_update_profile(data)
     return jsonify(profile), 201
+
+
+@api_bp.post("/api/autofill/start")
+def api_autofill_start() -> tuple[object, int]:
+    data = request.get_json()
+    if not data:
+        return jsonify({"error": "No data provided"}), 400
+
+    url = data.get("url")
+    profile_id = data.get("profile_id")
+
+    if not url or not profile_id:
+        return jsonify({"error": "url and profile_id required"}), 400
+
+    result = start_autofill(url, profile_id)
+    if "error" in result:
+        return jsonify(result), 404
+    return jsonify(result), 200
+
+
+@api_bp.get("/api/autofill/state")
+def api_autofill_state() -> tuple[object, int]:
+    return jsonify(get_form_state()), 200
+
+
+@api_bp.post("/api/autofill/close")
+def api_autofill_close() -> tuple[object, int]:
+    return jsonify(close_browser()), 200
 
 
 @api_bp.put("/api/profiles/<profile_id>")
