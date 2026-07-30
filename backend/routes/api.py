@@ -2,6 +2,8 @@
 
 from __future__ import annotations
 
+import hmac
+import logging
 import sys
 from pathlib import Path
 
@@ -11,6 +13,8 @@ ROOT_DIR = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT_DIR.parent))
 
 import secrets
+
+log = logging.getLogger(__name__)
 
 from backend.config import get_groq_api_key, get_groq_model
 from backend.limiter import limiter
@@ -210,8 +214,9 @@ def api_calendar_callback() -> tuple[object, int]:
         return jsonify({"error": "Authorization code not provided"}), 400
     expected_state = session.pop("calendar_oauth_state", None)
     profile_id = session.pop("calendar_profile_id", None)
-    if not state or state != expected_state:
-        return jsonify({"error": "Invalid OAuth state"}), 400
+    if not state or not hmac.compare_digest(state, expected_state or ""):
+        log.warning("Calendar OAuth state mismatch: expected=%s got=%s", expected_state, state)
+        return jsonify({"error": "Invalid OAuth state"}), 401
     if not profile_id:
         return jsonify({"error": "profile_id not found in session"}), 400
     handle_callback(code, profile_id)
