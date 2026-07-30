@@ -2,11 +2,7 @@
 
 from __future__ import annotations
 
-import sys
 from pathlib import Path
-
-PROJECT_ROOT = Path(__file__).resolve().parents[1]
-sys.path.insert(0, str(PROJECT_ROOT))
 
 from flask import Flask
 from flask_cors import CORS
@@ -16,6 +12,7 @@ from backend.limiter import limiter
 from backend.routes.api import api_bp
 from database.models import initialize_database
 
+PROJECT_ROOT = Path(__file__).resolve().parents[1]
 FRONTEND_DIR = PROJECT_ROOT / "frontend"
 
 

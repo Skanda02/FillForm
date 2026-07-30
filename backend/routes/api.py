@@ -4,15 +4,9 @@ from __future__ import annotations
 
 import hmac
 import logging
-import sys
-from pathlib import Path
+import secrets
 
 from flask import Blueprint, jsonify, redirect, request, session
-
-ROOT_DIR = Path(__file__).resolve().parents[1]
-sys.path.insert(0, str(ROOT_DIR.parent))
-
-import secrets
 
 log = logging.getLogger(__name__)
 
