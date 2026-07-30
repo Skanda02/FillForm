@@ -6,13 +6,6 @@ from backend.services.profile_service import get_profile
 from database.models import get_submission
 
 
-def _parse_percentage(value: str | None) -> float | None:
-    if not value:
-        return None
-    match = re.search(r"(\d+(?:\.\d+)?)", str(value))
-    return float(match.group(1)) if match else None
-
-
 def check_eligibility(submission_id: int, profile_id: str) -> dict:
     submission = get_submission(submission_id)
     if not submission:

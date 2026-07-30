@@ -74,9 +74,6 @@ def health() -> tuple[object, int]:
 @api_bp.post("/api/analyze")
 @limiter.limit("10 per minute")
 def api_analyze() -> tuple[object, int]:
-    if request.method == "OPTIONS":
-        return jsonify({}), 200
-
     try:
         parsed = parse_submission_input(request)
         if get_groq_api_key():
