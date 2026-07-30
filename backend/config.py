@@ -61,8 +61,11 @@ def get_google_client_secret() -> str | None:
 def get_secret_key() -> str:
     key = os.environ.get("SECRET_KEY")
     if not key and get_debug_mode():
-        log.warning("SECRET_KEY not set — generating random key for this session. Set SECRET_KEY env var for production.")
+        log.warning(
+            "SECRET_KEY not set — generating random key for this session. Set SECRET_KEY env var for production."
+        )
         import secrets as _secrets
+
         return _secrets.token_hex(32)
     if not key:
         raise RuntimeError(
