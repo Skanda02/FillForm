@@ -3,7 +3,7 @@ from __future__ import annotations
 import os
 from unittest.mock import patch
 
-from backend.database import get_collection, get_db
+from backend.mongo import get_collection, get_db
 
 
 def test_get_db_returns_singleton():

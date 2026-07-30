@@ -9,7 +9,7 @@ from google_auth_oauthlib.flow import Flow
 from googleapiclient.discovery import build
 
 from backend.config import get_google_calendar_redirect_uri
-from backend.database import get_collection
+from backend.mongo import get_collection
 
 log = logging.getLogger(__name__)
 

@@ -2,7 +2,7 @@ from __future__ import annotations
 
 from bson import ObjectId
 
-from backend.database import get_collection
+from backend.mongo import get_collection
 from backend.services.calendar_service import is_connected
 
 

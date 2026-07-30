@@ -6,7 +6,7 @@ from datetime import UTC, datetime
 from bson import ObjectId
 from bson.errors import InvalidId
 
-from backend.database import get_collection
+from backend.mongo import get_collection
 
 log = logging.getLogger(__name__)
 

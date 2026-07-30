@@ -9,7 +9,7 @@ def _mock_mongodb(monkeypatch):
     client = mongomock.MongoClient()
     db = client["fillform_test"]
 
-    import backend.database as db_mod
+    import backend.mongo as db_mod
 
     monkeypatch.setattr(db_mod, "_client", client)
     monkeypatch.setattr(db_mod, "_db", db)

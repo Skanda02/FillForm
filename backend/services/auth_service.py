@@ -10,7 +10,7 @@ import requests as http_requests
 from google_auth_oauthlib.flow import Flow
 
 from backend.config import get_google_auth_redirect_uri
-from backend.database import get_collection
+from backend.mongo import get_collection
 
 log = logging.getLogger(__name__)
 
