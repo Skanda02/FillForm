@@ -133,9 +133,7 @@ def save_resume_request(
 
 def list_resume_requests(db_path: str | None = None) -> list[dict[str, Any]]:
     with get_connection(db_path) as conn:
-        rows = conn.execute(
-            "SELECT * FROM resume_requests ORDER BY created_at DESC;"
-        ).fetchall()
+        rows = conn.execute("SELECT * FROM resume_requests ORDER BY created_at DESC;").fetchall()
         return [dict(r) for r in rows]
 
 
