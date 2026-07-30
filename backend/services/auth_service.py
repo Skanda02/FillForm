@@ -97,9 +97,14 @@ def _serialize(doc: dict) -> dict:
 
 def get_current_user(user_id: str) -> dict | None:
     from bson import ObjectId
+    from bson.errors import InvalidId
 
     col = get_collection("users")
-    doc = col.find_one({"_id": ObjectId(user_id)})
+    try:
+        oid = ObjectId(user_id)
+    except InvalidId:
+        return None
+    doc = col.find_one({"_id": oid})
     if not doc:
         return None
     user = _serialize(doc)
@@ -120,6 +125,7 @@ def get_user_id_from_session(session: dict) -> str | None:
 
 def create_profile_for_user(user_id: str, profile_data: dict) -> dict | None:
     from bson import ObjectId
+    from bson.errors import InvalidId
 
     from backend.services.profile_service import create_or_update_profile
 
@@ -128,8 +134,12 @@ def create_profile_for_user(user_id: str, profile_data: dict) -> dict | None:
         return None
 
     col = get_collection("users")
+    try:
+        oid = ObjectId(user_id)
+    except InvalidId:
+        return None
     col.update_one(
-        {"_id": ObjectId(user_id)},
+        {"_id": oid},
         {"$set": {"profile_id": profile["id"], "updated_at": datetime.now(UTC).isoformat()}},
     )
     return profile
