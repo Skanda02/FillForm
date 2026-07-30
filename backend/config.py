@@ -60,9 +60,15 @@ def get_google_client_secret() -> str | None:
 
 def get_secret_key() -> str:
     key = os.environ.get("SECRET_KEY")
+    if not key and get_debug_mode():
+        log.warning("SECRET_KEY not set — generating random key for this session. Set SECRET_KEY env var for production.")
+        import secrets as _secrets
+        return _secrets.token_hex(32)
     if not key:
-        log.warning("SECRET_KEY not set — using insecure dev default. Set SECRET_KEY env var for production.")
-        key = "fillform-dev-secret-change-in-production"
+        raise RuntimeError(
+            "SECRET_KEY environment variable is required in production. "
+            "Generate one with: python -c 'import secrets; print(secrets.token_hex(32))'"
+        )
     return key
 
 
