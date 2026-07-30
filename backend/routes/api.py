@@ -68,13 +68,7 @@ def health() -> tuple[object, int]:
 
 @api_bp.post("/api/analyze")
 def api_analyze() -> tuple[object, int]:
-    # lightweight request tracing to help diagnose 405/preflight issues
-    print("[api_analyze] incoming from", request.remote_addr, "method", request.method)
-    print("[api_analyze] Content-Type:", request.headers.get("Content-Type"))
-
-    # Explicitly respond to CORS preflight if it arrives here
     if request.method == "OPTIONS":
-        print("[api_analyze] preflight OPTIONS received")
         return jsonify({}), 200
 
     try:
@@ -267,9 +261,6 @@ def api_auth_callback() -> tuple[object, int]:
 
     code_verifier = session.get("code_verifier")
     redirect_uri = session.get("login_redirect_uri")
-    print(f"[DEBUG] Session keys: {list(session.keys())}", flush=True)
-    print(f"[DEBUG] code_verifier in session: {code_verifier is not None}", flush=True)
-    print(f"[DEBUG] redirect_uri: {redirect_uri}", flush=True)
 
     if not code_verifier:
         return jsonify({"error": "Session expired or code_verifier missing. Please try logging in again."}), 400
