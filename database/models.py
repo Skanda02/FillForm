@@ -109,6 +109,36 @@ def initialize_database(db_path: str | None = None) -> None:
         )
 
 
+def save_resume_request(
+    job_description: str,
+    original_resume: str,
+    optimized_resume: str | None = None,
+    changes_summary: str | None = None,
+    completed: bool = False,
+    db_path: str | None = None,
+) -> int:
+    now = _now_iso()
+    with get_connection(db_path) as conn:
+        cursor = conn.execute(
+            """
+            INSERT INTO resume_requests (
+                job_description, original_resume, optimized_resume,
+                changes_summary, created_at, completed
+            ) VALUES (?, ?, ?, ?, ?, ?);
+            """,
+            (job_description, original_resume, optimized_resume, changes_summary, now, 1 if completed else 0),
+        )
+        return cursor.lastrowid
+
+
+def list_resume_requests(db_path: str | None = None) -> list[dict[str, Any]]:
+    with get_connection(db_path) as conn:
+        rows = conn.execute(
+            "SELECT * FROM resume_requests ORDER BY created_at DESC;"
+        ).fetchall()
+        return [dict(r) for r in rows]
+
+
 def _row_to_dict(row: sqlite3.Row) -> dict[str, Any]:
     result = dict(row)
     if "keywords" in result:
