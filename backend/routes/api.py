@@ -21,7 +21,6 @@ from backend.services.auth_service import (
     logout_user,
 )
 from backend.services.calendar_service import create_event, get_auth_url, handle_callback, is_connected
-from backend.services.resume_service import get_resume_requests, optimize_resume
 from backend.services.eligibility_service import check_eligibility
 from backend.services.groq_service import GroqExtractionError, analyze_with_groq
 from backend.services.parser import parse_submission_input
@@ -33,6 +32,7 @@ from backend.services.profile_service import (
     list_profiles,
 )
 from backend.services.reminders import build_reminder_plan
+from backend.services.resume_service import get_resume_requests, optimize_resume
 from database.models import save_submission
 
 
