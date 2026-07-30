@@ -126,7 +126,11 @@ def api_diag() -> tuple[object, int]:
 
 @api_bp.get("/api/profiles")
 def api_list_profiles() -> tuple[object, int]:
-    return jsonify(list_profiles()), 200
+    limit = request.args.get("limit", 20, type=int)
+    offset = request.args.get("offset", 0, type=int)
+    limit = max(1, min(limit, 100))
+    offset = max(0, offset)
+    return jsonify(list_profiles(limit=limit, offset=offset)), 200
 
 
 @api_bp.get("/api/profiles/default")

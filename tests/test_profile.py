@@ -51,8 +51,9 @@ def test_delete_profile_not_found():
 def test_list_profiles():
     create_or_update_profile({"name": "Eve"})
     create_or_update_profile({"name": "Frank"})
-    profiles = list_profiles()
-    assert len(profiles) == 2
+    result = list_profiles()
+    assert result["total"] == 2
+    assert len(result["profiles"]) == 2
 
 
 def test_get_default_profile():
