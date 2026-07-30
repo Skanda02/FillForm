@@ -12,6 +12,7 @@ from flask import Flask
 from flask_cors import CORS
 
 from backend.config import get_cors_origins, get_debug_mode, get_secret_key
+from backend.limiter import limiter
 from backend.routes.api import api_bp
 from database.models import initialize_database
 
@@ -29,6 +30,7 @@ def create_app() -> Flask:
     app.config["SESSION_COOKIE_HTTPONLY"] = True
 
     CORS(app, resources={r"/api/*": {"origins": get_cors_origins()}})
+    limiter.init_app(app)
     app.register_blueprint(api_bp)
     initialize_database()
 

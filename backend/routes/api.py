@@ -13,6 +13,7 @@ sys.path.insert(0, str(ROOT_DIR.parent))
 import secrets
 
 from backend.config import get_groq_api_key, get_groq_model
+from backend.limiter import limiter
 from backend.services.analyzer import analyze_text
 from backend.services.auth_service import (
     create_profile_for_user,
@@ -67,6 +68,7 @@ def health() -> tuple[object, int]:
 
 
 @api_bp.post("/api/analyze")
+@limiter.limit("10 per minute")
 def api_analyze() -> tuple[object, int]:
     # lightweight request tracing to help diagnose 405/preflight issues
     print("[api_analyze] incoming from", request.remote_addr, "method", request.method)
