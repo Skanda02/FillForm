@@ -25,7 +25,6 @@ CLIENT_SECRETS_PATH = str(Path(__file__).resolve().parent.parent / "client_secre
 
 def get_login_url(state: str, redirect_uri: str | None = None) -> tuple[str, str]:
     uri = redirect_uri or get_google_auth_redirect_uri()
-    print(f"[AUTH] get_login_url: redirect_uri={uri!r}", flush=True)
     flow = Flow.from_client_secrets_file(
         CLIENT_SECRETS_PATH,
         scopes=LOGIN_SCOPES,
@@ -37,7 +36,6 @@ def get_login_url(state: str, redirect_uri: str | None = None) -> tuple[str, str
         prompt="consent",
         state=state,
     )
-    print(f"[AUTH] get_login_url: code_verifier={flow.code_verifier!r} (len={len(flow.code_verifier)})", flush=True)
     return auth_url, flow.code_verifier
 
 
@@ -62,7 +60,6 @@ def handle_login_callback(code: str, code_verifier: str, redirect_uri: str | Non
     )
     if resp.status_code != 200:
         log.error("Google userinfo request failed: status=%s body=%s", resp.status_code, resp.text[:200])
-        print(f"[AUTH] Google userinfo failed: status={resp.status_code} body={resp.text[:200]}", flush=True)
         return None
     google_user = resp.json()
 
