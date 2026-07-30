@@ -30,32 +30,12 @@ load_env_file()
 load_env_file(Path(__file__).with_name(".env"))
 
 
-def get_gemini_api_key() -> str | None:
-    return os.environ.get("GOOGLE_API_KEY") or os.environ.get("GEMINI_API_KEY")
-
-
-def get_gemini_model() -> str:
-    return os.environ.get("GEMINI_MODEL", "gemini-2.0-flash")
-
-
 def get_groq_api_key() -> str | None:
     return os.environ.get("GROQ_API_KEY")
 
 
 def get_groq_model() -> str:
     return os.environ.get("GROQ_MODEL", "llama-3.3-70b-versatile")
-
-
-def get_mongo_uri() -> str:
-    return os.environ.get("MONGO_URI", "mongodb://localhost:27017")
-
-
-def get_google_client_id() -> str | None:
-    return os.environ.get("GOOGLE_CLIENT_ID")
-
-
-def get_google_client_secret() -> str | None:
-    return os.environ.get("GOOGLE_CLIENT_SECRET")
 
 
 def get_secret_key() -> str:
@@ -82,14 +62,6 @@ def get_cors_origins() -> list[str]:
 
 def get_debug_mode() -> bool:
     return os.environ.get("FLASK_DEBUG", "false").lower() in ("1", "true", "yes")
-
-
-def get_google_login_client_id() -> str | None:
-    return os.environ.get("GOOGLE_LOGIN_CLIENT_ID")
-
-
-def get_google_login_client_secret() -> str | None:
-    return os.environ.get("GOOGLE_LOGIN_CLIENT_SECRET")
 
 
 def get_google_calendar_redirect_uri() -> str:
