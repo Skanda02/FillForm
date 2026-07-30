@@ -31,6 +31,7 @@ def app():
 
     application = create_app()
     application.config["TESTING"] = True
+    application.config["RATELIMIT_ENABLED"] = False
     application.config["SESSION_COOKIE_SAMESITE"] = "Lax"
     yield application
 
