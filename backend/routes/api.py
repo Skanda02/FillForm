@@ -32,6 +32,7 @@ from backend.services.profile_service import (
     list_profiles,
 )
 from backend.services.reminders import build_reminder_plan
+from backend.services.resume_service import get_resume_requests, optimize_resume
 from database.models import save_submission
 
 
@@ -242,6 +243,26 @@ def api_calendar_status() -> tuple[object, int]:
     if not profile_id:
         return jsonify({"error": "profile_id required"}), 400
     return jsonify({"connected": is_connected(profile_id)}), 200
+
+
+@api_bp.post("/api/resume/optimize")
+def api_resume_optimize() -> tuple[object, int]:
+    data = request.get_json()
+    if not data:
+        return jsonify({"error": "No data provided"}), 400
+    job_description = data.get("job_description")
+    original_resume = data.get("original_resume")
+    if not job_description or not original_resume:
+        return jsonify({"error": "job_description and original_resume required"}), 400
+    result = optimize_resume(job_description, original_resume)
+    if "error" in result:
+        return jsonify(result), 400
+    return jsonify(result), 201
+
+
+@api_bp.get("/api/resume/requests")
+def api_resume_requests() -> tuple[object, int]:
+    return jsonify(get_resume_requests()), 200
 
 
 @api_bp.get("/api/auth/login")
