@@ -27,6 +27,7 @@ def create_app() -> Flask:
     )
     app.secret_key = get_secret_key()
     app.config["SESSION_COOKIE_SAMESITE"] = "Lax"
+    app.config["SESSION_COOKIE_SECURE"] = not get_debug_mode()
     app.config["SESSION_COOKIE_HTTPONLY"] = True
 
     CORS(app, resources={r"/api/*": {"origins": get_cors_origins()}})
