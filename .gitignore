@@ -9,6 +9,7 @@ docs/superpowers/
 .ruff_cache/
 *.db
 *.sqlite
+*.egg-info/
 
 # Secrets and credentials — never commit these
 .env
