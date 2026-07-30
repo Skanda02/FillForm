@@ -10,7 +10,9 @@ def test_health_check(client):
 def test_get_profiles_empty(client):
     response = client.get("/api/profiles")
     assert response.status_code == 200
-    assert response.get_json() == []
+    data = response.get_json()
+    assert data["total"] == 0
+    assert data["profiles"] == []
 
 
 def test_create_and_get_profile(client, sample_profile_data):

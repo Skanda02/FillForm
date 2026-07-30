@@ -80,6 +80,8 @@ def delete_profile(profile_id: str) -> bool:
     return result.deleted_count > 0
 
 
-def list_profiles() -> list[dict]:
+def list_profiles(limit: int = 20, offset: int = 0) -> dict:
     col = get_collection("profiles")
-    return [_serialize(doc) for doc in col.find(sort=[("created_at", -1)])]
+    total = col.count_documents({})
+    docs = col.find(sort=[("created_at", -1)]).skip(offset).limit(limit)
+    return {"total": total, "limit": limit, "offset": offset, "profiles": [_serialize(doc) for doc in docs]}
