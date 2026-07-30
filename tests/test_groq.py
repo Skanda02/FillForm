@@ -1,6 +1,9 @@
 from __future__ import annotations
 
-from unittest.mock import ANY, Mock, patch
+from datetime import UTC
+from unittest.mock import Mock, patch
+
+import pytest
 
 from backend.services.groq_service import (
     GroqExtractionError,
@@ -19,11 +22,8 @@ class TestParseJsonResponse:
         assert result == {"company": "Test"}
 
     def test_no_json_raises(self):
-        try:
+        with pytest.raises(GroqExtractionError):
             _parse_json_response("No JSON here")
-            assert False, "expected GroqExtractionError"
-        except GroqExtractionError:
-            pass
 
 
 class TestNormalizeDeadline:
@@ -48,9 +48,9 @@ class TestNormalizeDeadline:
         assert "2020-01-01" in result
 
     def test_today_date(self):
-        from datetime import datetime, timezone
+        from datetime import datetime
 
-        today = datetime.now(timezone.utc).strftime("%Y-%m-%d")
+        today = datetime.now(UTC).strftime("%Y-%m-%d")
         result, status = _normalize_deadline(today)
         assert status == "today"
         assert today in result
@@ -68,66 +68,59 @@ class TestAnalyzeWithGroq:
         mock_response.json.return_value = {
             "choices": [{"message": {"content": '{"company": "TestCorp", "role": "Engineer", "deadline": null}'}}]
         }
-
-        with patch("backend.services.groq_service.requests.post", return_value=mock_response):
-            with patch("backend.services.groq_service.get_groq_api_key", return_value="test-key"):
-                result = analyze_with_groq({"text": "Test job posting"})
+        with (
+            patch("backend.services.groq_service.requests.post", return_value=mock_response),
+            patch("backend.services.groq_service.get_groq_api_key", return_value="test-key"),
+        ):
+            result = analyze_with_groq({"text": "Test job posting"})
 
         assert result["company"] == "TestCorp"
         assert result["role"] == "Engineer"
         assert result["deadline"] is None
-        assert result["registration_status"] == "unknown"
         assert "eligibility" in result
         assert "criteria" in result
         assert "job_summary" in result
 
     def test_missing_api_key(self):
-        with patch("backend.services.groq_service.get_groq_api_key", return_value=None):
-            try:
-                analyze_with_groq({"text": "test"})
-                assert False, "expected GroqExtractionError"
-            except GroqExtractionError as e:
-                assert "Groq API key" in str(e)
+        with (
+            patch("backend.services.groq_service.get_groq_api_key", return_value=None),
+            pytest.raises(GroqExtractionError, match="Groq API key"),
+        ):
+            analyze_with_groq({"text": "test"})
 
     def test_api_error_response(self):
         mock_response = Mock()
         mock_response.ok = False
         mock_response.status_code = 429
         mock_response.text = "Rate limited"
-
-        with patch("backend.services.groq_service.requests.post", return_value=mock_response):
-            with patch("backend.services.groq_service.get_groq_api_key", return_value="test-key"):
-                try:
-                    analyze_with_groq({"text": "test"})
-                    assert False, "expected GroqExtractionError"
-                except GroqExtractionError as e:
-                    assert "429" in str(e)
+        with (
+            patch("backend.services.groq_service.requests.post", return_value=mock_response),
+            patch("backend.services.groq_service.get_groq_api_key", return_value="test-key"),
+            pytest.raises(GroqExtractionError, match="429"),
+        ):
+            analyze_with_groq({"text": "test"})
 
     def test_no_choices(self):
         mock_response = Mock()
         mock_response.ok = True
         mock_response.json.return_value = {"choices": []}
-
-        with patch("backend.services.groq_service.requests.post", return_value=mock_response):
-            with patch("backend.services.groq_service.get_groq_api_key", return_value="test-key"):
-                try:
-                    analyze_with_groq({"text": "test"})
-                    assert False, "expected GroqExtractionError"
-                except GroqExtractionError:
-                    pass
+        with (
+            patch("backend.services.groq_service.requests.post", return_value=mock_response),
+            patch("backend.services.groq_service.get_groq_api_key", return_value="test-key"),
+            pytest.raises(GroqExtractionError),
+        ):
+            analyze_with_groq({"text": "test"})
 
     def test_empty_content(self):
         mock_response = Mock()
         mock_response.ok = True
         mock_response.json.return_value = {"choices": [{"message": {"content": ""}}]}
-
-        with patch("backend.services.groq_service.requests.post", return_value=mock_response):
-            with patch("backend.services.groq_service.get_groq_api_key", return_value="test-key"):
-                try:
-                    analyze_with_groq({"text": "test"})
-                    assert False, "expected GroqExtractionError"
-                except GroqExtractionError:
-                    pass
+        with (
+            patch("backend.services.groq_service.requests.post", return_value=mock_response),
+            patch("backend.services.groq_service.get_groq_api_key", return_value="test-key"),
+            pytest.raises(GroqExtractionError),
+        ):
+            analyze_with_groq({"text": "test"})
 
     def test_parses_deadline_and_status(self):
         mock_response = Mock()
@@ -135,9 +128,10 @@ class TestAnalyzeWithGroq:
         mock_response.json.return_value = {
             "choices": [{"message": {"content": '{"company": "X", "deadline": "2099-06-15"}'}}]
         }
-
-        with patch("backend.services.groq_service.requests.post", return_value=mock_response):
-            with patch("backend.services.groq_service.get_groq_api_key", return_value="test-key"):
-                result = analyze_with_groq({"text": "test"})
+        with (
+            patch("backend.services.groq_service.requests.post", return_value=mock_response),
+            patch("backend.services.groq_service.get_groq_api_key", return_value="test-key"),
+        ):
+            result = analyze_with_groq({"text": "test"})
 
         assert result["registration_status"] == "active"

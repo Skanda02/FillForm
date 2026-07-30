@@ -1,9 +1,5 @@
 from __future__ import annotations
 
-from unittest.mock import Mock, patch
-
-import pytest
-
 from backend.services.auth_service import (
     create_profile_for_user,
     get_current_user,

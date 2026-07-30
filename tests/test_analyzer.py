@@ -1,7 +1,5 @@
 from __future__ import annotations
 
-from unittest.mock import ANY, Mock, patch
-
 from backend.services.analyzer import (
     analyze_text,
     build_structured_summary,
@@ -10,8 +8,8 @@ from backend.services.analyzer import (
     extract_ctc,
     extract_deadline_candidates,
     extract_deadline_label,
-    extract_eligible_degree,
     extract_eligibility,
+    extract_eligible_degree,
     extract_keywords,
     extract_registration_link,
     extract_registration_status,

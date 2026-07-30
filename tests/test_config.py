@@ -3,15 +3,17 @@ from __future__ import annotations
 import os
 from unittest.mock import patch
 
+import pytest
+
 from backend.config import (
-    load_env_file,
-    get_groq_api_key,
-    get_groq_model,
     get_cors_origins,
     get_debug_mode,
-    get_secret_key,
-    get_google_calendar_redirect_uri,
     get_google_auth_redirect_uri,
+    get_google_calendar_redirect_uri,
+    get_groq_api_key,
+    get_groq_model,
+    get_secret_key,
+    load_env_file,
 )
 
 
@@ -63,12 +65,8 @@ def test_get_secret_key_debug_generates():
 
 
 def test_get_secret_key_production_raises():
-    with patch.dict(os.environ, {}, clear=True):
-        try:
-            get_secret_key()
-            assert False, "expected RuntimeError"
-        except RuntimeError:
-            pass
+    with patch.dict(os.environ, {}, clear=True), pytest.raises(RuntimeError):
+        get_secret_key()
 
 
 def test_get_secret_key_from_env():

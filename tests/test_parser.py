@@ -1,7 +1,8 @@
 from __future__ import annotations
 
-import io
 from unittest.mock import Mock
+
+import pytest
 
 from backend.services.parser import normalize_text, parse_submission_input
 
@@ -13,7 +14,7 @@ class TestNormalizeText:
     def test_strips_whitespace(self):
         assert normalize_text("  hello world  ") == "hello world"
 
-    def test_preserves_newlines_as_spaces(self):
+    def test_collapses_newlines_to_spaces(self):
         assert normalize_text("hello\nworld") == "hello world"
 
     def test_empty_string(self):
@@ -47,21 +48,15 @@ class TestParseSubmissionInput:
         request = Mock()
         request.form = {}
         request.files = {}
-        try:
+        with pytest.raises(ValueError):
             parse_submission_input(request)
-            assert False, "expected ValueError"
-        except ValueError:
-            pass
 
     def test_raises_on_empty_text(self):
         request = Mock()
         request.form = {"text": ""}
         request.files = {}
-        try:
+        with pytest.raises(ValueError):
             parse_submission_input(request)
-            assert False, "expected ValueError"
-        except ValueError:
-            pass
 
     def test_raises_on_non_pdf(self):
         request = Mock()
@@ -69,11 +64,8 @@ class TestParseSubmissionInput:
         file_mock = Mock()
         file_mock.filename = "test.txt"
         request.files = {"file": file_mock}
-        try:
+        with pytest.raises(ValueError):
             parse_submission_input(request)
-            assert False, "expected ValueError"
-        except ValueError:
-            pass
 
     def test_with_text_and_pdf_text_takes_precedence(self):
         request = Mock()
