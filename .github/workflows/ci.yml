@@ -27,6 +27,24 @@ jobs:
       - name: Run ruff format check
         run: ruff format --check .
 
+      - name: Check for secrets in tracked files
+        run: |
+          SECRET_PATTERNS='\.env$|client_secret\.json|service-account.*\.json|\.key$|\.pem$'
+          if git ls-files | grep -qE "$SECRET_PATTERNS"; then
+            echo "::error::Secret files detected in tracked files!"
+            git ls-files | grep -E "$SECRET_PATTERNS"
+            exit 1
+          fi
+          echo "::notice::No secret files tracked"
+
+      - name: Scan for hardcoded secrets
+        run: |
+          pip install trufflehog 2>/dev/null || true
+          if command -v trufflehog &>/dev/null; then
+            trufflehog git --since-commit HEAD~1 --no-update --only-verified 2>&1 || true
+          fi
+          echo "(trufflehog is best run with full history; manual rotation recommended)"
+
   test:
     name: Test
     runs-on: ubuntu-latest
