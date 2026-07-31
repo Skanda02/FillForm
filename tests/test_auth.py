@@ -27,8 +27,9 @@ class TestGetCurrentUser:
         assert get_current_user("invalid-id") is None
 
     def test_returns_user_when_found(self):
-        from backend.mongo import get_collection
         from bson import ObjectId
+
+        from backend.mongo import get_collection
 
         col = get_collection("users")
         oid = ObjectId()
@@ -40,8 +41,9 @@ class TestGetCurrentUser:
         assert result["id"] == str(oid)
 
     def test_includes_profile_when_linked(self):
-        from backend.mongo import get_collection
         from bson import ObjectId
+
+        from backend.mongo import get_collection
 
         users = get_collection("users")
         profiles = get_collection("profiles")
@@ -57,8 +59,9 @@ class TestGetCurrentUser:
 
 class TestCreateProfileForUser:
     def test_creates_and_links_profile(self):
-        from backend.mongo import get_collection
         from bson import ObjectId
+
+        from backend.mongo import get_collection
 
         users = get_collection("users")
         oid = ObjectId()
